@@ -323,7 +323,7 @@ sync
 sudo mkdir -p /mnt/rootfs/boot/extlinux/
 sudo sh -c "echo 'label Linux ${kernel_version}' > /mnt/rootfs/boot/extlinux/extlinux.conf"
 sudo sh -c "echo '    kernel /boot/vmlinuz-${kernel_version}' >> /mnt/rootfs/boot/extlinux/extlinux.conf"
-sudo sh -c "echo '    append console=ttySTM0,115200 root=/dev/mmcblk0p4 ro rootfstype=ext4 rootwait quiet' >> /mnt/rootfs/boot/extlinux/extlinux.conf"
+sudo sh -c "echo '    append console=ttySTM0,115200 console=tty1,115200 console=tty0,115200 fbcon=rotate:3 root=/dev/mmcblk0p4 ro rootfstype=ext4 rootwait' >> /mnt/rootfs/boot/extlinux/extlinux.conf"
 sudo sh -c "echo '    fdtdir /boot/dtbs/${kernel_version}/' >> /mnt/rootfs/boot/extlinux/extlinux.conf"
 ```
 
