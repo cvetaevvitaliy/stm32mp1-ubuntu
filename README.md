@@ -8,26 +8,49 @@ Boards:
   * [Evaluation board with STM32MP157D MPU 43 at Digi-Key](https://www.digikey.com/en/products/detail/stmicroelectronics/STM32MP157D-EV1/13536967)
   * [Evaluation board with STM32MP157F MPU 32 at Digi-Key](https://www.digikey.com/en/products/detail/stmicroelectronics/STM32MP157F-EV1/12395904)
 
-# Basic Requirements
+## Basic Requirements
 Running a recent supported release of Debian, Fedora or Ubuntu on a x86 64bit based PC; without OS Virtualization Software. <br>
 Many of the listed commands assume `/bin/bash` as the default shell. <br> 
 
-ARM Cross Compiler – Linaro: https://www.linaro.org 17 <br>
-  * Linaro Toolchain Binaries: https://www.linaro.org/downloads/ 13 <br>
+ARM Cross Compiler – Linaro: https://www.linaro.org <br>
+  * Linaro Toolchain Binaries: https://www.linaro.org/downloads/ <br>
 
 Bootloader <br>
-  * Das U-Boot – the Universal Boot Loader: http://www.denx.de/wiki/U-Boot 21 <br>
-  * Source: https://github.com/u-boot/u-boot/ 10 <br>
+  * Das U-Boot – the Universal Boot Loader: http://www.denx.de/wiki/U-Boot <br>
+  * Source: https://github.com/u-boot/u-boot/  <br>
 
 Linux Kernel <br>
-  * Linus’s Mainline tree: https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git 12 <br>
+  * Linus’s Mainline tree: https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git <br>
 
 ARM based rootfs <br>
-  * Debian: https://www.debian.org 8 <br>
-  * Ubuntu: https://www.ubuntu.com 13 <br>
+  * Debian: https://www.debian.org <br>
+  * Ubuntu: https://www.ubuntu.com  <br>
+
+# Manual build 
+For full automatic build run:
+```bash
+./build.sh 
+```
+
+For separate build, uboot, kernel and rootfs
+```bash
+./build.sh uboot
+./build.sh kernel
+./build.sh ubuntu
+./build.sh debian
+```
+For make sdcard.img image
+```bash
+./build.sh mkimage
+```
+
+*update in progress build scripts
 
 
-# ARM Cross Compiler: GCC
+# Manual build 
+For manual build, follow these steps.
+
+## ARM Cross Compiler: GCC
 This is a pre-built (64bit) version of GCC that runs on generic linux, sorry (32bit) x86 users, it’s time to upgrade…
 Download/Extract:
 
@@ -54,7 +77,7 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 ```
 
 
-# Bootloader: U-Boot
+## Bootloader: U-Boot
 
 Das U-Boot – the Universal Boot Loader: http://www.denx.de/wiki/U-Boot  <br>
 Depending on your Linux Distrubution, you will also need a host gcc and other tools, so with Debian/Ubuntu start with installing the build-essential meta package.  <br>
@@ -101,7 +124,7 @@ make ARCH=arm CROSS_COMPILE=${CC} DEVICE_TREE=stm32mp157c-dk2 all
 ```
 
 
-# Linux Kernel
+## Linux Kernel
 This script will build the kernel, modules, device tree binaries and copy them to the deploy directory.
 
 Download:
@@ -129,7 +152,7 @@ git checkout origin/v5.15.x -b tmp
 ./build_kernel.sh
 ```
 
-# Root File System
+## Root File System
 
 **Debian 11**
 
@@ -148,7 +171,7 @@ tar xf debian-11.1-minimal-armhf-2021-11-02.tar.xz
 ```
 
 
-# Ubuntu 20.04 LTS
+## Ubuntu 20.04 LTS
 **User and password:** `ubuntu  temppwd` `root  root` <br>
 
 Download:
@@ -163,7 +186,7 @@ Extract:
 tar xf ubuntu-20.04.3-minimal-armhf-2021-11-02.tar.xz
 ```
 
-# Ubuntu 18.04 LTS
+## Ubuntu 18.04 LTS
 **User and password:** `ubuntu  temppwd` `root  root` <br>
 
 Download:
@@ -266,7 +289,7 @@ sudo mkdir -p /mnt/rootfs
 sudo mount /dev/loop0p4 /media/rootfs/
 ```
 
-# Install Kernel and Root File System
+## Install Kernel and Root File System
 To help new users, since the kernel version can change on a daily basis. The kernel building scripts listed on this page will now give you a hint of what kernel version was built.
 ```bash
 -----------------------------
@@ -351,7 +374,7 @@ sudo losetup -D
 
 After successfully completing these steps, you will get `.img` image for writing to SD card
 
-# How to flash .img to SD card
+## How to flash .img to SD card
 
 For safe and easy writing to SD card download [balenaEtcher](https://www.balena.io/etcher/)
 
@@ -365,7 +388,7 @@ For safe and easy writing to SD card download [balenaEtcher](https://www.balena.
  
 After flash remove sd card from PC and insert to STM32MP157 board
 
-# Finished image for flash SD card for STM32MP157-DK2
+## Finished image for flash SD card for STM32MP157-DK2
 
 If you do not want to go through all the steps, you can download the finished SD card image, just write it to the SD card
 
