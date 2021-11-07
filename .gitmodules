@@ -1,7 +1,7 @@
 [submodule "u-boot"]
 	path = u-boot
 	url = https://github.com/u-boot/u-boot
-	branch = v2021.10
+	branch = master
 
 [submodule "armv7-lpae-multiplatform"]
 	path = armv7-lpae-multiplatform
