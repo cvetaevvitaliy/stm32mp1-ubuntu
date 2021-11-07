@@ -26,7 +26,7 @@ ARM based rootfs <br>
   * Debian: https://www.debian.org <br>
   * Ubuntu: https://www.ubuntu.com  <br>
 
-# Manual build 
+# Automatic build 
 For full automatic build run:
 ```bash
 ./build.sh 
@@ -44,7 +44,7 @@ For make sdcard.img image
 ./build.sh mkimage
 ```
 
-*update in progress build scripts
+***update in progress build scripts**
 
 
 # Manual build 
