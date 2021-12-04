@@ -4,8 +4,10 @@ export LC_ALL=C
 
 # TODO: need to make config file for configure build versions
 UBOOT_VERSION="v2021.10"
-KERNEL_VERSION="v5.15.x"
-UBUNTU_VERSION="ubuntu-20.04.3"
+KERNEL_VERSION="5.8.5-armv7-lpae-x11"
+ROOTFS_NAME="ubuntu-18.04.6-minimal-armhf-2021-11-02.tar.xz"
+ROOT_FS_LINK="wget -c https://rcn-ee.com/rootfs/eewiki/minfs/${ROOTFS_NAME}"
+UBUNTU_VERSION="ubuntu"
 
 CUR_PATH=$(pwd)
 
@@ -94,7 +96,7 @@ function build_kernel(){
     	
     if ! [ -d ./armv7-lpae-multiplatform ]; then
 		echo "============================================"
-    	echo "Start get Kernel source"
+    	echo "Init submodule Kernel source"
     	git submodule init
     	git submodule update
     fi
@@ -103,7 +105,10 @@ function build_kernel(){
     echo "Start build Kernel"
     cd armv7-lpae-multiplatform
     
-    git checkout origin/${KERNEL_VERSION} -b tmp
+    echo "Get Kernel version '${KERNEL_VERSION}'"
+    git reet --hard
+    git checkout ${KERNEL_VERSION}
+    echo "Start build Kernel ${KERNEL_VERSION}"
     (exec "$BUILD_KERNEL")
     cd ..
     
@@ -157,14 +162,14 @@ function download_ubuntu(){
     echo "Download ${UBUNTU_VERSION} "
     check_download_dir
     
-    if ! [ -f ./download_dir/${UBUNTU_VERSION}-minimal-armhf-2021-11-02.tar.xz ]; then
-    wget -P ./download_dir https://rcn-ee.com/rootfs/eewiki/minfs/${UBUNTU_VERSION}-minimal-armhf-2021-11-02.tar.xz
+    if ! [ -f ./download_dir/${ROOTFS_NAME} ]; then
+    wget -P ./download_dir ${ROOT_FS_LINK}
     fi
     
     if ! [ -d ./${UBUNTU_VERSION} ]; then
     mkdir ./${UBUNTU_VERSION}
     echo "Extract to ${CUR_PATH}/${UBUNTU_VERSION} "
-    tar xvf ./download_dir/${UBUNTU_VERSION}-minimal-armhf-2021-11-02.tar.xz -C ./${UBUNTU_VERSION}
+    tar xvf ./download_dir/${ROOTFS_NAME} -C ./${UBUNTU_VERSION}
     fi
 }
 
@@ -180,17 +185,21 @@ function check(){
 
 function calenup(){
     echo ""
-    echo "Clean up loop device"
+
+    echo "Try umount folder: '${MOUNT_PATH}'"
     sudo umount ${MOUNT_PATH}
     case "$?" in 
-    	0) echo "Umount OK"  ;;
-    	*) echo "Error Umount" ;;
+    	0) echo "umount '${MOUNT_PATH}' OK"  ;;
+    	*) echo "Error mmount folder '${MOUNT_PATH}'" ;;
     esac
+
+    echo "Try clean up loop: '${LOOP_DEVICE}' "
     sudo losetup -D
     case "$?" in 
-    	0) echo "Clean ${LOOP_DEVICE} device OK"  ;;
-    	*) echo "Error clean ${LOOP_DEVICE} device " ;;
+    	0) echo "Clean loop '${LOOP_DEVICE}' device OK"  ;;
+    	*) echo "Error clean '${LOOP_DEVICE}' device " ;;
     esac
+    echo "Finish"
     exit 0
 }
 
@@ -249,6 +258,7 @@ function create_image(){
 		sudo dd if=./output/u-boot.img of=${LOOP_DEVICE}p3
     else 
     	echo "First need build U-Boot, please make './build.sh uboot'"
+	exit 0
     fi
     
     echo ""
@@ -256,63 +266,85 @@ function create_image(){
     echo "Format RootFS Partition:"
     echo ""
     sudo mkfs.ext4 -L rootfs ${LOOP_DEVICE}p4
-	check	
-    
+    check
+
     MOUNT_PATH="./output/rootfs"
-    
+
     echo "Mount rootfs file system to ${MOUNT_PATH}"
     echo ""
     sudo mkdir -p ${MOUNT_PATH}
     sudo mount /dev/loop0p4 ${MOUNT_PATH}
-	check
-    
+    check
+
     echo ""
     if [ -d ./armv7-lpae-multiplatform/deploy ]; then
-    	kernel_ver=$(basename ./armv7-lpae-multiplatform/deploy/*.zImage | rev | cut -c 8- | rev )
-		echo "Kernel version ${kernel_ver}"
-	    
+	kernel_ver=$(basename ./armv7-lpae-multiplatform/deploy/*.zImage | rev | cut -c 8- | rev )
+	echo "Kernel version ${kernel_ver}"
     else
-    	echo "First need build Kernel, please make './build.sh kernel'"
+	echo "First need build Kernel, please make './build.sh kernel'"
+	exit 0
     fi
-    
-    
+
+
     echo ""
     echo "Copy Root File System"
     if [ -d ./${UBUNTU_VERSION} ]; then
-    mkdir ./${UBUNTU_VERSION}
-    	echo "Extract to ${CUR_PATH}/${UBUNTU_VERSION} "
-    	sudo tar xfp ./${UBUNTU_VERSION}/ubuntu-*-*-armhf-*/armhf-rootfs-*.tar -C ${MOUNT_PATH}
-    	check
+	echo "Extract to ${CUR_PATH}/${UBUNTU_VERSION} "
+	sudo tar xfp ./${UBUNTU_VERSION}/*/*.tar -C ${MOUNT_PATH}
+	check
     else
-    	echo "First need get rootfs, please make './build.sh ubuntu'"	
+	echo "First need get rootfs, please make './build.sh ubuntu'"
+	exit 0
     fi
-    
+
+
     echo ""
     echo "Setup extlinux.conf"
-    sudo mkdir -p ${MOUNT_PATH}/boot/extlinux/
-    sudo sh -c "echo 'label Linux ${kernel_ver}' > ${MOUNT_PATH}/boot/extlinux/extlinux.conf"
-    sudo sh -c "echo '    kernel /boot/vmlinuz-${kernel_ver}' >> ${MOUNT_PATH}/boot/extlinux/extlinux.conf"
-	sudo sh -c "echo '    append console=ttySTM0,115200 console=tty1,115200 console=tty0,115200 fbcon=rotate:3 root=/dev/mmcblk0p4 ro rootfstype=ext4 rootwait' >> ${MOUNT_PATH}/boot/extlinux/extlinux.conf"
+	sudo mkdir -p ${MOUNT_PATH}/boot/extlinux/
+	sudo sh -c "echo 'label Linux ${kernel_ver}' > ${MOUNT_PATH}/boot/extlinux/extlinux.conf"
+	sudo sh -c "echo '    kernel /boot/vmlinuz-${kernel_ver}' >> ${MOUNT_PATH}/boot/extlinux/extlinux.conf"
+	sudo sh -c "echo '    append console=ttySTM0,115200 console=tty1,115200 fbcon=rotate:3 root=/dev/mmcblk0p4 ro rootfstype=ext4 rootwait' >> ${MOUNT_PATH}/boot/extlinux/extlinux.conf"
 	sudo sh -c "echo '    fdtdir /boot/dtbs/${kernel_ver}/' >> ${MOUNT_PATH}/boot/extlinux/extlinux.conf"
 	check
-    
+
     echo ""
     echo "Copy Kernel Image"
-    sudo cp -v ./armv7-lpae-multiplatform/deploy/${kernel_ver}.zImage ${MOUNT_PATH}/boot/vmlinuz-${kernel_ver}
-    check
-    
-    
+	sudo cp -v ./armv7-lpae-multiplatform/deploy/${kernel_ver}.zImage ${MOUNT_PATH}/boot/vmlinuz-${kernel_ver}
+	check
+
+
     echo ""
     echo "Copy Kernel Device Tree Binaries"
 	sudo mkdir -p ${MOUNT_PATH}/boot/dtbs/${kernel_ver}/
 	sudo tar xf ./armv7-lpae-multiplatform/deploy/${kernel_ver}-dtbs.tar.gz -C ${MOUNT_PATH}/boot/dtbs/${kernel_ver}/
 	check
-	
-	    
+
     echo ""
     echo "Copy Kernel Modules"
-	sudo tar xf ./armv7-lpae-multiplatform/deploy/${kernel_ver}-modules.tar.gz -C ${MOUNT_PATH}
+	sudo tar xfv ./armv7-lpae-multiplatform/deploy/${kernel_ver}-modules.tar.gz -C ${MOUNT_PATH}
 	check
+
+	#sudo sh -c "echo 'auto eth0' >> ${MOUNT_PATH}/etc/network/interfaces"
+	#sudo sh -c "echo 'iface eth0 inet dhcp' >> ${MOUNT_PATH}/etc/network/interfaces"
+
+    echo ""
+    echo "Copy WiFi firmware"
+	sudo mkdir -p ${MOUNT_PATH}/lib/firmware/brcm/
+	sudo cp -v ./wifi_firmware/brcmfmac43430* ${MOUNT_PATH}/lib/firmware/brcm/
+	sudo cp -v ./wifi_firmware/brcmfmac43430-sdio.txt ${MOUNT_PATH}/lib/firmware/brcm/brcmfmac43430-sdio.st,stm32mp157c-dk2.txt
+	check
+
+# activate welcome message
+	sudo chmod +x ${MOUNT_PATH}/etc/update-motd.d/00-header
+	sudo chmod +x ${MOUNT_PATH}/etc/update-motd.d/10-help-text
+	sudo chmod +x ${MOUNT_PATH}/etc/update-motd.d/50-motd-news
+	sudo chmod +x ${MOUNT_PATH}/etc/update-motd.d/80-esm
+	sudo chmod +x ${MOUNT_PATH}/etc/update-motd.d/80-livepatch
+
+    echo ""
+    echo "Copy helper scripts"
+	sudo cp -v ./script/resize_sd.sh ${MOUNT_PATH}/usr/bin/
+	sudo cp -v ./script/activate_wifi.sh ${MOUNT_PATH}/usr/bin/
 	
     echo ""
     echo "File Systems Table (/etc/fstab)"
@@ -321,10 +353,10 @@ function create_image(){
 
 	sync
 	case "$?" in 
-    	0) echo "Sync OK"  ;;
-    	*) echo "Error sync " ;;
+	0) echo "Sync OK"  ;;
+	*) echo "Error sync " ;;
 	esac
-	
+
 	calenup
     
 }
@@ -345,6 +377,14 @@ function check_env(){
 function build_info(){
     echo "============================================"
     echo "Build information"
+}
+
+function compress_img(){
+    echo "Compress SD card image"
+    TAR_NAME=$(basename ${ROOTFS_NAME} | cut -c 1-14)
+    echo "${TAR_NAME}"
+    # tar cfv - ./output/sdcard-stm32mp157.img | pv | xz -z -T0 - > ./output/${TAR_NAME}-full-sd-image.tar.xz
+    pv ./output/sdcard-stm32mp157.img | gzip  > ./output/${TAR_NAME}-full-sd-image.img.gz
 }
 
 
@@ -376,6 +416,7 @@ for option in ${OPTIONS}; do
 	mkimage) create_image ;;
 	cleanall) build_cleanall ;;
 	check) check_env ;;
+	compress_img) compress_img ;;
 	info) build_info ;;
 	*) usage ;;
     esac
