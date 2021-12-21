@@ -54,3 +54,8 @@ download_dir/
 toolchain/
 output/
 ubuntu-20.04.3/
+ubuntu*/
+
+debian_10_rootfs/
+debian_11_rootfs/
+debian_rootfs/
