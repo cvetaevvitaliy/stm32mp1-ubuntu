@@ -28,51 +28,51 @@ jobs:
           cp -v system.sh.sample armv7-lpae-multiplatform/system.sh
           echo AUTO_BUILD=1 >> armv7-lpae-multiplatform/system.sh
           
-      - name: build kernel
+      - name: build kernel & modules
         working-directory: ./stm32mp1-ubuntu
         run: bash build.sh kernel
         
-      - name: build Ubuntu 18
+      - name: Create Ubuntu 18 rootfs
         working-directory: ./stm32mp1-ubuntu
         run: bash build.sh mkubuntu18   
           
-      - name: build Ubuntu 20
+      - name: Create Ubuntu 20 rootfs
         working-directory: ./stm32mp1-ubuntu
         run: | 
           rm -f output/sdcard-stm32mp157.img 
           bash build.sh mkubuntu20      
 
-      - name: build Debian 10
+      - name: Create Debian 10 rootfs
         working-directory: ./stm32mp1-ubuntu
         run: | 
           rm -f output/sdcard-stm32mp157.img 
           bash build.sh mkdebian10
           
-      - name: build Debian 11
+      - name: Create Debian 11 rootfs
         working-directory: ./stm32mp1-ubuntu
         run: | 
           rm -f output/sdcard-stm32mp157.img 
           bash build.sh mkdebian11
           
-      - name: Upload Artifacts Ubuntu 18
+      - name: Upload Ubuntu 18
         uses: actions/upload-artifact@v2
         with:
           name: "Download artifacts - Ubuntu 18"
           path: ${{runner.workspace}}/stm32mp1-ubuntu/stm32mp1-ubuntu/output/ubuntu-18*.img.gz
 
-      - name: Upload Artifacts Ubuntu 20
+      - name: Upload Ubuntu 20
         uses: actions/upload-artifact@v2
         with:
           name: "Download artifacts - Ubuntu 20"
           path: ${{runner.workspace}}/stm32mp1-ubuntu/stm32mp1-ubuntu/output/ubuntu-20*.img.gz
           
-      - name: Upload Artifacts Debian 10
+      - name: Upload Debian 10
         uses: actions/upload-artifact@v2
         with:
           name: "Download artifacts - Debian 10"
           path: ${{runner.workspace}}/stm32mp1-ubuntu/stm32mp1-ubuntu/output/debian-10*.img.gz   
           
-      - name: Upload Artifacts Debian 11
+      - name: Upload Debian 11
         uses: actions/upload-artifact@v2
         with:
           name: "Download artifacts - Debian 11"
