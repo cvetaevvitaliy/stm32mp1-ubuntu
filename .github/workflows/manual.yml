@@ -11,6 +11,7 @@ jobs:
           path: stm32mp1-ubuntu
           
       - name: Pull & update submodules recursively
+        working-directory: ./stm32mp1-ubuntu
         run: |
           git submodule update --init --recursive
           git submodule update --recursive --remote   
