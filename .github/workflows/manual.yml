@@ -19,11 +19,11 @@ jobs:
         
       - name: build uboot
         working-directory: ./stm32mp1-ubuntu
-        run: ls -l && bash build.sh uboot -j32
+        run: ls -l && bash build.sh uboot
     
       - name: Install depends
-        run: sudo apt-get install -y lzop
+        run: sudo apt-get install -y lzop lzma gettext libmpc-dev u-boot-tools libncurses5-dev
         
       - name: build kernel
         working-directory: ./stm32mp1-ubuntu
-        run: bash build.sh kernel -j22
+        run: bash build.sh kernel
