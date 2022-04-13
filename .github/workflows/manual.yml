@@ -22,7 +22,7 @@ jobs:
         run: ls -l && bash build.sh uboot -j32
     
       - name: Install depends
-        run: npm install lzop
+        run: sudo apt-get install -y lzop
         
       - name: build kernel
         working-directory: ./stm32mp1-ubuntu
