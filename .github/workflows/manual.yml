@@ -58,22 +58,22 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: "Download artifacts - Ubuntu 18"
-          path: ${{runner.workspace}}/stm32mp1-ubuntu/output/ubuntu-18*.img.gz
+          path: ${{runner.workspace}}/stm32mp1-ubuntu/stm32mp1-ubuntu/output/ubuntu-18*.img.gz
 
       - name: Upload Artifacts Ubuntu 20
         uses: actions/upload-artifact@v2
         with:
           name: "Download artifacts - Ubuntu 20"
-          path: ${{runner.workspace}}/stm32mp1-ubuntu/output/ubuntu-20*.img.gz
+          path: ${{runner.workspace}}/stm32mp1-ubuntu/stm32mp1-ubuntu/output/ubuntu-20*.img.gz
           
       - name: Upload Artifacts Debian 10
         uses: actions/upload-artifact@v2
         with:
           name: "Download artifacts - Debian 10"
-          path: ${{runner.workspace}}/stm32mp1-ubuntu/output/debian-10*.img.gz   
+          path: ${{runner.workspace}}/stm32mp1-ubuntu/stm32mp1-ubuntu/output/debian-10*.img.gz   
           
       - name: Upload Artifacts Debian 11
         uses: actions/upload-artifact@v2
         with:
           name: "Download artifacts - Debian 11"
-          path: ${{runner.workspace}}/stm32mp1-ubuntu/output/debian-11*.img.gz           
+          path: ${{runner.workspace}}/stm32mp1-ubuntu/stm32mp1-ubuntu/output/debian-11*.img.gz           
