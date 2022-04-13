@@ -18,4 +18,8 @@ jobs:
           
       - name: build uboot
         working-directory: ./stm32mp1-ubuntu
-        run: ls -l && bash build.sh uboot
+        run: ls -l && bash build.sh uboot -j32
+        
+      - name: build kernel
+        working-directory: ./stm32mp1-ubuntu
+        run: ls -l && bash build.sh kernel -j22
