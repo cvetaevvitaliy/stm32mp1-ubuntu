@@ -19,7 +19,7 @@ jobs:
         run: ls -l && bash build.sh uboot
     
       - name: Install depends
-        run: sudo apt-get install -y lzop lzma gettext libmpc-dev u-boot-tools libncurses5-dev
+        run: sudo apt-get install -y lzop lzma gettext libmpc-dev u-boot-tools libncurses5-dev pv gzip
      
       - name: copy system.sh script
         # AUTO_BUILD=1 disable kernel menuconfig menu before build
