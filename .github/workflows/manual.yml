@@ -29,6 +29,6 @@ jobs:
         run: |
           ls -l 
           ls -l armv7-lpae-multiplatform
-          cp -v armv7-lpae-multiplatform/system.sh.sample armv7-lpae-multiplatform/system.sh
+          cp -v system.sh.sample armv7-lpae-multiplatform/system.sh
           echo AUTO_BUILD=1 >> armv7-lpae-multiplatform/system.sh
           bash build.sh kernel
