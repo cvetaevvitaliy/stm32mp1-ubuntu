@@ -15,11 +15,15 @@ jobs:
         run: |
           git submodule update --init --recursive
           git submodule update --recursive --remote   
-          
+    
+        
       - name: build uboot
         working-directory: ./stm32mp1-ubuntu
         run: ls -l && bash build.sh uboot -j32
+    
+      - name: Install depends
+        run: npm install lzop
         
       - name: build kernel
         working-directory: ./stm32mp1-ubuntu
-        run: ls -l && bash build.sh kernel -j22
+        run: bash build.sh kernel -j22
