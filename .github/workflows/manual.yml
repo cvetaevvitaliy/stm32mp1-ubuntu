@@ -1,0 +1,13 @@
+on: workflow_dispatch
+jobs:
+  build-all:
+    runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        config: [ ubuntu ]
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          path: stm32mp1-ubuntu
+      - name: build uboot
+        run: ./build.sh uboot
