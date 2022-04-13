@@ -10,4 +10,5 @@ jobs:
         with:
           path: stm32mp1-ubuntu
       - name: build uboot
-        run: ./build.sh uboot
+        working-directory: ./stm32mp1-ubuntu
+        run: ls -l && bash build.sh uboot
