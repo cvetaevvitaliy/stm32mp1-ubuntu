@@ -9,6 +9,12 @@ jobs:
       - uses: actions/checkout@v2
         with:
           path: stm32mp1-ubuntu
+          
+      - name: Pull & update submodules recursively
+        run: |
+          git submodule update --init --recursive
+          git submodule update --recursive --remote   
+          
       - name: build uboot
         working-directory: ./stm32mp1-ubuntu
         run: ls -l && bash build.sh uboot
