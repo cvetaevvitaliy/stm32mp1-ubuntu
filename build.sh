@@ -284,7 +284,7 @@ function copy_kernel(){
     echo "Mount rootfs file system to ${MOUNT_PATH}"
     echo ""
     sudo mkdir -p ${MOUNT_PATH}
-    sudo mount /dev/loop0p4 ${MOUNT_PATH}
+    sudo mount ${LOOP_DEVICE}p4 ${MOUNT_PATH}
     check
 
     echo ""
@@ -384,7 +384,7 @@ function create_image(){
 #    echo "Mount rootfs file system to ${MOUNT_PATH}"
 #    echo ""
 #    sudo mkdir -p ${MOUNT_PATH}
-#    sudo mount /dev/loop0p4 ${MOUNT_PATH}
+#    sudo mount ${LOOP_DEVICE}p4 ${MOUNT_PATH}
 #    check
 #
 #    echo ""
@@ -488,7 +488,7 @@ function open_qemu(){
     echo "Mount rootfs file system to ${MOUNT_PATH}"
     echo ""
     sudo mkdir -p ${MOUNT_PATH}
-    sudo mount /dev/loop0p4 ${MOUNT_PATH}
+    sudo mount ${LOOP_DEVICE}p4 ${MOUNT_PATH}
     check
     
     

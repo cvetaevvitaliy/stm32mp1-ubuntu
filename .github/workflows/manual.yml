@@ -1,13 +1,79 @@
 on: workflow_dispatch
 jobs:
-  build-all:
+  build-all-os:
     runs-on: ubuntu-20.04
-    strategy:
-      matrix:
-        config: [ ubuntu ]
     steps:
       - uses: actions/checkout@v2
         with:
           path: stm32mp1-ubuntu
+          
+      - name: Pull & update submodules recursively
+        working-directory: ./stm32mp1-ubuntu
+        run: |
+          git submodule update --init --recursive
+          git submodule update --recursive --remote   
+    
+        
       - name: build uboot
-        run: ./build.sh uboot
+        working-directory: ./stm32mp1-ubuntu
+        run: ls -l && bash build.sh uboot
+    
+      - name: Install depends
+        run: sudo apt-get install -y lzop lzma gettext libmpc-dev u-boot-tools libncurses5-dev pv gzip
+     
+      - name: copy system.sh script
+        # AUTO_BUILD=1 disable kernel menuconfig menu before build
+        working-directory: ./stm32mp1-ubuntu
+        run: |
+          cp -v system.sh.sample armv7-lpae-multiplatform/system.sh
+          echo AUTO_BUILD=1 >> armv7-lpae-multiplatform/system.sh
+          
+      - name: build kernel & modules
+        working-directory: ./stm32mp1-ubuntu
+        run: bash build.sh kernel
+        
+      - name: Create Ubuntu 18 rootfs
+        working-directory: ./stm32mp1-ubuntu
+        run: bash build.sh mkubuntu18   
+          
+      - name: Create Ubuntu 20 rootfs
+        working-directory: ./stm32mp1-ubuntu
+        run: | 
+          rm -f output/sdcard-stm32mp157.img 
+          bash build.sh mkubuntu20      
+
+      - name: Create Debian 10 rootfs
+        working-directory: ./stm32mp1-ubuntu
+        run: | 
+          rm -f output/sdcard-stm32mp157.img 
+          bash build.sh mkdebian10
+          
+      - name: Create Debian 11 rootfs
+        working-directory: ./stm32mp1-ubuntu
+        run: | 
+          rm -f output/sdcard-stm32mp157.img 
+          bash build.sh mkdebian11
+          
+      - name: Upload Ubuntu 18
+        uses: actions/upload-artifact@v2
+        with:
+          name: "Download artifacts - Ubuntu 18"
+          path: ${{runner.workspace}}/stm32mp1-ubuntu/stm32mp1-ubuntu/output/ubuntu-18*.img.gz
+
+      - name: Upload Ubuntu 20
+        uses: actions/upload-artifact@v2
+        with:
+          name: "Download artifacts - Ubuntu 20"
+          path: ${{runner.workspace}}/stm32mp1-ubuntu/stm32mp1-ubuntu/output/ubuntu-20*.img.gz
+          
+      - name: Upload Debian 10
+        uses: actions/upload-artifact@v2
+        with:
+          name: "Download artifacts - Debian 10"
+          path: ${{runner.workspace}}/stm32mp1-ubuntu/stm32mp1-ubuntu/output/debian-10*.img.gz   
+          
+      - name: Upload Debian 11
+        uses: actions/upload-artifact@v2
+        with:
+          name: "Download artifacts - Debian 11"
+          path: ${{runner.workspace}}/stm32mp1-ubuntu/stm32mp1-ubuntu/output/debian-11*.img.gz           
