@@ -1,4 +1,4 @@
-# Ubuntu 18.04, 20.04 for stm32mp157
+# Ubuntu 18.04, 20.04, Debian 10, 11 for stm32mp157
 This repo for build and run Ubuntu on stm32mp157 <br> 
 Availability
 Boards:
