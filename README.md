@@ -286,7 +286,7 @@ sudo mkfs.ext4 -L rootfs /dev/loop0p4
 **Mount rootfs file system**
 ```bash
 sudo mkdir -p /mnt/rootfs
-sudo mount /dev/loop0p4 /media/rootfs/
+sudo mount /dev/loop0p4 /mnt/rootfs/
 ```
 
 ## Install Kernel and Root File System
