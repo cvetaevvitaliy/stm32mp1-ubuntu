@@ -20,6 +20,15 @@ fi
 #/bin/sh -e "${DIR}/build-uboot.sh" || { exit 1 ; }
 
 
+apply_patch() {
+	cd "${DIR}/linux" || exit
+	git apply --stat ../00001-add-stm32mp157a-sodimm2-mx.patch
+	git apply --stat ../00002-add-panel-simle-o4_lcd5_800_480.patch
+	git apply --stat ../00003-remove-plus-from-kernel-version.patch
+
+	cd "${DIR}/" || exit
+}
+
 copy_defconfig () {
 	cd "${DIR}/linux" || exit
 	make ARCH=${KERNEL_ARCH} CROSS_COMPILE="${CC}" distclean
@@ -63,7 +72,7 @@ make_kernel () {
 	make -j${CORES} ARCH=${KERNEL_ARCH} CROSS_COMPILE="${CC}" dtbs
 	echo "-----------------------------"
 
-	make_gpu_driver
+	# make_gpu_driver
 
 	KERNEL_UTS=$(cat "${DIR}/linux/include/generated/utsrelease.h" | awk '{print $3}' | sed 's/\"//g' )
 
@@ -147,6 +156,7 @@ make_dtbs_pkg () {
 	make_pkg
 }
 
+apply_patch
 
 copy_defconfig
 
