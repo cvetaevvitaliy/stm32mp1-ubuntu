@@ -16,8 +16,12 @@ jobs:
       - name: Install depends
         run: sudo apt-get install -y lzop lzma gettext libmpc-dev u-boot-tools libncurses5-dev pv gzip flex bison ncurses-base build-essential qemu-user-static device-tree-compiler
           
-      - name: build kernel & modules
+      - name: Build U-boot and ARM trusted firmware
         working-directory: ./stm32mp1-ubuntu
         run: bash build-uboot.sh
+
+      - name: Build kernel 
+        working-directory: ./stm32mp1-ubuntu
+        run: bash build-linux.sh
         
           
