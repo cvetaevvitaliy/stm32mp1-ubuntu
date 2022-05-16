@@ -5,6 +5,8 @@ DIR=$PWD
 
 UBOOT_VERSION="v2020.10"
 
+/bin/sh -e "${DIR}/gcc.sh" || { exit 1 ; }
+
 . "${DIR}/.CC"
 . "${DIR}/version.sh"
 echo "CROSS_COMPILE=${CC}"
@@ -13,6 +15,7 @@ if [ ! "${CORES}" ] ; then
 	CORES=$(($(getconf _NPROCESSORS_ONLN) * 2)) # cores and thread
 fi
 
+mkdir -p "${DIR}/deploy/"
 
 build_uboot(){
     echo "============================================"
