@@ -22,7 +22,7 @@ fi
 
 copy_defconfig () {
 	cd "${DIR}/linux" || exit
-	#make ARCH=${KERNEL_ARCH} CROSS_COMPILE="${CC}" distclean
+	make ARCH=${KERNEL_ARCH} CROSS_COMPILE="${CC}" distclean
 	#make ARCH=${KERNEL_ARCH} CROSS_COMPILE="${CC}" "${config}"
 	cp -v "${DIR}/defconfig_${config}" .config
 	cd "${DIR}/" || exit
@@ -31,10 +31,22 @@ copy_defconfig () {
 make_menuconfig () {
 	cd "${DIR}/linux" || exit
 	#make ARCH=${KERNEL_ARCH} CROSS_COMPILE="${CC}" oldconfig
-	make ARCH=${KERNEL_ARCH} CROSS_COMPILE="${CC}" menuconfig
+	#make ARCH=${KERNEL_ARCH} CROSS_COMPILE="${CC}" menuconfig
 	cp -v .config "${DIR}/defconfig_${config}"
 
 	cd "${DIR}/" || exit
+}
+
+make_gpu_driver() {
+    
+    cd ${DIR}/gcnano-driver-6.4.3
+
+    make KERNEL_DIR=${DIR}/linux CROSS_COMPILE="${CC}" clean
+    make KERNEL_DIR=${DIR}/linux CROSS_COMPILE="${CC}" all
+	#cp -v galcore.ko ${DIR}/linux/lib/modules/5.10.61/extra/
+
+    cd "${DIR}/linux"
+
 }
 
 make_kernel () {
@@ -50,6 +62,8 @@ make_kernel () {
 	echo "-----------------------------"
 	make -j${CORES} ARCH=${KERNEL_ARCH} CROSS_COMPILE="${CC}" dtbs
 	echo "-----------------------------"
+
+	make_gpu_driver
 
 	KERNEL_UTS=$(cat "${DIR}/linux/include/generated/utsrelease.h" | awk '{print $3}' | sed 's/\"//g' )
 
@@ -133,16 +147,6 @@ make_dtbs_pkg () {
 	make_pkg
 }
 
-make_gpu_driver() {
-    
-    cd ${DIR}/gcnano-driver-6.4.3
-
-    make KERNEL_DIR=${DIR}/linux CROSS_COMPILE="${CC}" clean
-    make KERNEL_DIR=${DIR}/linux CROSS_COMPILE="${CC}" all
-
-    cd "${DIR}/"
-
-}
 
 copy_defconfig
 
@@ -154,7 +158,6 @@ make_modules_pkg
 
 make_dtbs_pkg
 
-make_gpu_driver
 
 echo "-----------------------------"
 echo "Script Complete"
@@ -162,4 +165,4 @@ echo "${KERNEL_UTS}" > kernel_version
 echo "eewiki.net: [user@localhost:~$ export kernel_version=${KERNEL_UTS}]"
 echo "-----------------------------"
 
-/bin/sh -e "${DIR}/create-rootfs.sh" || { exit 1 ; }
+#/bin/sh -e "${DIR}/create-rootfs.sh" || { exit 1 ; }

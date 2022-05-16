@@ -4,6 +4,8 @@
 export LC_ALL=C
 DIR=$PWD
 
+. "${DIR}/version.sh"
+
 IMAGE_FILENAME="sdcard-stm32mp157.img"
 MOUNT_PATH="${DIR}/deploy/rootfs"
 
@@ -100,8 +102,8 @@ write_uboot() {
         # sudo dd if=${DIR}/deploy/u-boot-spl.stm32 of=${LOOP_DEVICE}0p1
         # sudo dd if=${DIR}/deploy/u-boot-spl.stm32 of=${LOOP_DEVICE}p2
         # sudo dd if=${DIR}/deploy/u-boot.img of=${LOOP_DEVICE}p3
-        sudo dd if=${DIR}/deploy/tf-a-stm32mp157c-dk2.stm32 of=${LOOP_DEVICE}p1
-        sudo dd if=${DIR}/deploy/tf-a-stm32mp157c-dk2.stm32 of=${LOOP_DEVICE}p2
+        sudo dd if=${DIR}/deploy/tf-a-${board}.stm32 of=${LOOP_DEVICE}p1
+        sudo dd if=${DIR}/deploy/tf-a-${board}.stm32 of=${LOOP_DEVICE}p2
         sudo dd if=${DIR}/deploy/fip.bin of=${LOOP_DEVICE}p3
     else
         echo "Error, Uboot not found"
@@ -135,7 +137,12 @@ write_rootfs(){
     echo "Copy Root File System"
     if [ -d ./deploy/${UBUNTU_18_VERSION} ]; then
         echo "Extract to ${CUR_PATH}/${UBUNTU_18_VERSION} "
-        sudo tar xvfp ./deploy/${UBUNTU_18_VERSION}/*/*.tar -C ${MOUNT_PATH}
+        # ubuntu-base-22.04-base-armhf.tar.gz
+        # sudo tar xvfp ./deploy/${UBUNTU_18_VERSION}/*/*.tar -C ${MOUNT_PATH}
+        # sudo tar xvfp ${DIR}/ubuntu-base-22.04-base-armhf.tar.gz -C ${MOUNT_PATH}
+        #sudo tar xvfp ${DIR}/rootfs.tar.gz -C ${MOUNT_PATH}
+        sudo cp -r ${DIR}/rootfs/.  ${MOUNT_PATH}
+        # sudo rsync -azvh ${DIR}/rootfs/.  ${MOUNT_PATH}
     else
         echo "First need get rootfs, please make './build.sh ubuntu'"
         clean_loop
@@ -145,12 +152,14 @@ write_rootfs(){
 }
 
 copy_kernel_and_modules(){
+    #fbcon=rotate:3
+
     echo ""
     echo "Setup extlinux.conf"
     sudo mkdir -p ${MOUNT_PATH}/boot/extlinux/
     sudo sh -c "echo 'label Linux ${kernel_ver}' > ${MOUNT_PATH}/boot/extlinux/extlinux.conf"
     sudo sh -c "echo '    kernel /boot/vmlinuz-${kernel_ver}' >> ${MOUNT_PATH}/boot/extlinux/extlinux.conf"
-    sudo sh -c "echo '    append console=ttySTM0,115200 console=tty1,115200 fbcon=rotate:3 root=/dev/mmcblk0p4 ro rootfstype=ext4 rootwait' >> ${MOUNT_PATH}/boot/extlinux/extlinux.conf"
+    sudo sh -c "echo '    append console=ttySTM0,115200 console=tty1,115200 root=/dev/mmcblk0p4 ro rootwait ' >> ${MOUNT_PATH}/boot/extlinux/extlinux.conf"
     sudo sh -c "echo '    fdtdir /boot/dtbs/${kernel_ver}/' >> ${MOUNT_PATH}/boot/extlinux/extlinux.conf"
 
 
@@ -165,12 +174,13 @@ copy_kernel_and_modules(){
 
     echo ""
     echo "Copy Kernel Modules"
-    sudo tar xfv ./deploy/${kernel_ver}-modules.tar.gz -C ${MOUNT_PATH}
+    sudo tar xfv ./deploy/${kernel_ver}-modules.tar.gz -C ${MOUNT_PATH}/usr/
 
     echo ""
     echo "Copy GPU video driver" # sudo depmod -a
     echo "first start, need rescan all modules: 'sudo depmod -a'"
-    cp -v ${DIR}/gcnano-driver-6.4.3/galcore.ko ${MOUNT_PATH}/lib/modules/${kernel_ver}/kernel/drivers/gpu/drm/
+    sudo mkdir -p ${MOUNT_PATH}/lib/modules/${kernel_ver}/extra/
+    sudo cp -v ${DIR}/gcnano-driver-6.4.3/galcore.ko ${MOUNT_PATH}/lib/modules/${kernel_ver}/extra/
 
     sudo sh -c "echo 'auto eth0' >> ${MOUNT_PATH}/etc/network/interfaces"
     sudo sh -c "echo 'iface eth0 inet dhcp' >> ${MOUNT_PATH}/etc/network/interfaces"
@@ -178,16 +188,16 @@ copy_kernel_and_modules(){
     echo ""
     echo "Copy WiFi firmware"
     sudo mkdir -p ${MOUNT_PATH}/lib/firmware/brcm/
-    sudo cp -v ./wifi_firmware/brcmfmac43430* ${MOUNT_PATH}/lib/firmware/brcm/
-    sudo cp -v ./wifi_firmware/brcmfmac43430-sdio.txt ${MOUNT_PATH}/lib/firmware/brcm/brcmfmac43430-sdio.st,stm32mp157c-dk2.txt
+    sudo cp -v ./wifi_firmware/* ${MOUNT_PATH}/lib/firmware/brcm/
+    sudo cp -v ./wifi_firmware/brcmfmac43430-sdio.txt ${MOUNT_PATH}/lib/firmware/brcm/brcmfmac43430-sdio.st,${board}.txt
     
 
 # activate welcome message
-    sudo chmod +x ${MOUNT_PATH}/etc/update-motd.d/00-header
-    sudo chmod +x ${MOUNT_PATH}/etc/update-motd.d/10-help-text
-    sudo chmod +x ${MOUNT_PATH}/etc/update-motd.d/50-motd-news
-    sudo chmod +x ${MOUNT_PATH}/etc/update-motd.d/80-esm
-    sudo chmod +x ${MOUNT_PATH}/etc/update-motd.d/80-livepatch
+    # sudo chmod +x ${MOUNT_PATH}/etc/update-motd.d/00-header
+    # sudo chmod +x ${MOUNT_PATH}/etc/update-motd.d/10-help-text
+    # sudo chmod +x ${MOUNT_PATH}/etc/update-motd.d/50-motd-news
+    # sudo chmod +x ${MOUNT_PATH}/etc/update-motd.d/80-esm
+    # sudo chmod +x ${MOUNT_PATH}/etc/update-motd.d/80-livepatch
 
     echo ""
     echo "Copy helper scripts"
@@ -197,6 +207,9 @@ copy_kernel_and_modules(){
     echo ""
     echo "File Systems Table (/etc/fstab)"
     sudo sh -c "echo '/dev/mmcblk0p4  /  auto  errors=remount-ro  0  1' >> ${MOUNT_PATH}/etc/fstab"
+
+    ls -l ${MOUNT_PATH}/lib/systemd/
+    ls -l ${MOUNT_PATH}/sbin/init
     
     sync
     case "$?" in
@@ -204,6 +217,18 @@ copy_kernel_and_modules(){
     *) echo "Error sync " ;;
     esac
 }
+
+OPTIONS="${@:-allff}"
+
+for option in ${OPTIONS}; do
+    # echo "processing option: $option"
+    case $option in
+    stm32mp157a-sodimm2-mx) board=${OPTIONS} ;;
+    stm32mp157c-dk2) board={OPTIONS} ;;
+
+    *) board="stm32mp157c-dk2" ;;
+    esac
+done
 
 
 make_rootfs

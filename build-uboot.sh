@@ -6,6 +6,7 @@ DIR=$PWD
 UBOOT_VERSION="v2020.10"
 
 . "${DIR}/.CC"
+. "${DIR}/version.sh"
 echo "CROSS_COMPILE=${CC}"
 
 if [ ! "${CORES}" ] ; then
@@ -16,9 +17,10 @@ fi
 build_uboot(){
     echo "============================================"
     echo "Start get U-Boot"
+    echo "Board: ${board}"
     if [ -f ${DIR}/u-boot/u-boot.bin ]; then
         echo
-       return 0
+       #return 0
     fi 
     
     if ! [ -d ${DIR}/u-boot ]; then
@@ -35,13 +37,13 @@ build_uboot(){
     make ARCH=arm CROSS_COMPILE=${CC} distclean
 	#make ARCH=arm CROSS_COMPILE=${CC} stm32mp15_basic_defconfig
     make ARCH=arm CROSS_COMPILE=${CC} stm32mp15_trusted_defconfig
-	make ARCH=arm CROSS_COMPILE=${CC} DEVICE_TREE=stm32mp157c-dk2 all u-boot.stm32 -j${CORES}
+	make ARCH=arm CROSS_COMPILE=${CC} DEVICE_TREE=${board} all u-boot.stm32 -j${CORES}
 	
 	echo "============================================"
 	if [ -f  u-boot.bin ]; then
 	    echo "U-Boot Build Finish"
 	
-        mkdir -p "${DIR}/deploy/"
+        mkdir -p "${DIR}/deploy"
 
 	    echo "Copy U-Boot to deploy folder"
 	    #if [ -f ${DIR}/deploy/u-boot-spl.stm32 ]; then rm ${DIR}/deploy/u-boot-spl.stm32; fi
@@ -64,12 +66,13 @@ build_arm_trusted_firmware() {
     cd ${DIR}/arm-trusted-firmware
     echo "============================================"
     echo "Start build Arm Trusted Firmware "
-   rm -r ./build
+    #rm -r ./build
+    make clean
     make -C ./tools/fiptool \
         PLAT=stm32mp1 ARCH=aarch32 ARM_ARCH_MAJOR=7 CROSS_COMPILE=${CC} \
         STM32MP_SDMMC=1 STM32MP_EMMC=1 \
         AARCH32_SP=sp_min \
-        DTB_FILE_NAME=stm32mp157c-dk2.dtb \
+        DTB_FILE_NAME=${board}.dtb \
         BL33_CFG=${DIR}/u-boot/u-boot.dtb \
         BL33=${DIR}/u-boot/u-boot-nodtb.bin \
         -j${CORES}
@@ -78,16 +81,16 @@ build_arm_trusted_firmware() {
         PLAT=stm32mp1 ARCH=aarch32 ARM_ARCH_MAJOR=7 CROSS_COMPILE=${CC} \
         STM32MP_SDMMC=1 STM32MP_EMMC=1 \
         AARCH32_SP=sp_min \
-        DTB_FILE_NAME=stm32mp157c-dk2.dtb \
+        DTB_FILE_NAME=${board}.dtb \
         BL33_CFG=${DIR}/u-boot/u-boot.dtb \
         BL33=${DIR}/u-boot/u-boot-nodtb.bin \
         all fip -j${CORES}
 
-	if [ -f ${DIR}/deploy/tf-a-stm32mp157c-dk2.stm32 ]; then 
-            rm ${DIR}/deploy/tf-a-stm32mp157c-dk2.stm32
+	if [ -f ${DIR}/deploy/tf-a-${board}.stm32 ]; then 
+            rm ${DIR}/deploy/tf-a-${board}.stm32
     fi
 
-    cp -v ./build/stm32mp1/release/tf-a-stm32mp157c-dk2.stm32 ${DIR}/deploy
+    cp -v ./build/stm32mp1/release/tf-a-${board}.stm32 ${DIR}/deploy
 
     if [ -f ${DIR}/deploy/fip.bin ]; then 
             rm ${DIR}/deploy/fip.bin
@@ -99,6 +102,18 @@ build_arm_trusted_firmware() {
     cd "${DIR}/" || exit 0
 
 }
+
+OPTIONS="${@:-allff}"
+
+for option in ${OPTIONS}; do
+    # echo "processing option: $option"
+    case $option in
+    stm32mp157a-sodimm2-mx) board=${OPTIONS} ;;
+    stm32mp157c-dk2) board={OPTIONS} ;;
+
+    *) board="stm32mp157c-dk2" ;;
+    esac
+done
 
 build_uboot
 
