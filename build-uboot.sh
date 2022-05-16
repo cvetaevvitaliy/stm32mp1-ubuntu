@@ -17,28 +17,14 @@ fi
 
 mkdir -p "${DIR}/deploy/"
 
-build_uboot(){
-    echo "============================================"
-    echo "Start get U-Boot"
-    echo "Board: ${board}"
-    if [ -f ${DIR}/u-boot/u-boot.bin ]; then
-        echo
-       #return 0
-    fi 
-    
-    if ! [ -d ${DIR}/u-boot ]; then
-		echo "============================================"
-    	echo "Update submodule"
-    	git submodule init
-    	git submodule update
-    fi
-    
+build_uboot() {    
     cd ${DIR}/u-boot
     echo "============================================"
     echo "Start build U-Boot ${UBOOT_VERSION}"
-    #git checkout ${UBOOT_VERSION}
+    echo "Board: ${board}"
+
     make ARCH=arm CROSS_COMPILE=${CC} distclean
-	#make ARCH=arm CROSS_COMPILE=${CC} stm32mp15_basic_defconfig
+	#make ARCH=arm CROSS_COMPILE=${CC} stm32mp15_basic_defconfig # non trusted u-boot
     make ARCH=arm CROSS_COMPILE=${CC} stm32mp15_trusted_defconfig
 	make ARCH=arm CROSS_COMPILE=${CC} DEVICE_TREE=${board} all u-boot.stm32 -j${CORES}
 	
@@ -49,11 +35,12 @@ build_uboot(){
         mkdir -p "${DIR}/deploy"
 
 	    echo "Copy U-Boot to deploy folder"
+       # non trusted u-boot
 	    #if [ -f ${DIR}/deploy/u-boot-spl.stm32 ]; then rm ${DIR}/deploy/u-boot-spl.stm32; fi
 	    #if [ -f ${DIR}/deploy/u-boot.img ]; then rm ${DIR}/deploy/u-boot.img; fi
         #if [ -f ${DIR}/deploy/u-boot.bin ]; then rm ${DIR}/deploy/u-boot.bin; fi
-	
 	    #cp -v u-boot-spl.stm32 ${DIR}/deploy
+
 	    cp -v u-boot.bin ${DIR}/deploy
 	else
 	    echo "U-Boot Build Failed"
