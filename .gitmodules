@@ -6,8 +6,6 @@
 [submodule "linux"]
 	path = linux
 	url = https://github.com/STMicroelectronics/linux
-	branch = v5.10-stm32mp
-
 
 [submodule "arm-trusted-firmware"]
 	path = arm-trusted-firmware
