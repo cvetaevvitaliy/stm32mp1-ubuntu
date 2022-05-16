@@ -1,13 +1,29 @@
 on: workflow_dispatch
 jobs:
-  build-all:
+  build-all-os:
     runs-on: ubuntu-20.04
-    strategy:
-      matrix:
-        config: [ ubuntu ]
     steps:
       - uses: actions/checkout@v2
         with:
           path: stm32mp1-ubuntu
+          
+      - name: Pull & update submodules recursively
+        working-directory: ./stm32mp1-ubuntu
+        run: |
+          git submodule update --init --recursive
+          git submodule update --recursive --remote   
+    
+        
       - name: build uboot
-        run: ./build.sh uboot
+        working-directory: ./stm32mp1-ubuntu
+        run: ls -l && bash build.sh uboot
+    
+      - name: Install depends
+        run: sudo apt-get install -y lzop lzma gettext libmpc-dev u-boot-tools libncurses5-dev pv gzip flex bison ncurses-base build-essential qemu-user-static device-tree-compiler
+     
+          
+      - name: build kernel & modules
+        working-directory: ./stm32mp1-ubuntu
+        run: bash build-uboot.sh
+        
+          
