@@ -25,7 +25,7 @@ new file mode 100644
 index 000000000000..2867c4d45923
 --- /dev/null
 +++ b/arch/arm/boot/dts/stm32mp157a-sodimm2-mx.dts
-@@ -0,0 +1,1510 @@
+@@ -0,0 +1,1509 @@
 +/* SPDX-License-Identifier: (GPL-2.0+ OR BSD-3-Clause) */
 +/*
 + * Copyright (C) STMicroelectronics 2022 - All Rights Reserved
@@ -1535,4 +1535,3 @@ index 000000000000..2867c4d45923
 +	vbus-supply = <&vbus_sw>;
 +};
 +/* USER CODE END addons */
-+
