@@ -196,7 +196,7 @@ copy_kernel_and_modules(){
     
 
     # add wellcome information
-    sudo sh -c "echo 'Ubuntu 22.04 LTS \n \l' > ${MOUNT_PATH}/etc/issue"
+    sudo sh -c "echo 'Ubuntu 22.04 LTS \\l' > ${MOUNT_PATH}/etc/issue"
     sudo sh -c "echo 'Build: $(date +'%d/%m/%Y')' >> ${MOUNT_PATH}/etc/issue"
     sudo sh -c "echo ' ' >> ${MOUNT_PATH}/etc/issue"
     sudo sh -c "echo 'login: ubuntu' >> ${MOUNT_PATH}/etc/issue"
