@@ -142,7 +142,7 @@ write_rootfs(){
         # sudo tar xvfp ./deploy/${UBUNTU_18_VERSION}/*/*.tar -C ${MOUNT_PATH}
         # sudo tar xvfp ${DIR}/ubuntu-base-22.04-base-armhf.tar.gz -C ${MOUNT_PATH}
         #sudo tar xzpf ${DIR}/deploy/rootfs.tar.gz -C ${MOUNT_PATH}
-        sudo tar xzpf ${DIR}/dl/rootfs.tar.gz -C ${MOUNT_PATH}
+        sudo tar xzpf ${DIR}/dl/${rootfs_name} -C ${MOUNT_PATH} || { clean_loop ; exit 1 ; }
         #sudo cp -ar ${DIR}/deploy/rootfs/.  ${MOUNT_PATH}
         #sudo rsync -azvh ${DIR}/rootfs/.  ${MOUNT_PATH}
         # sudo tar xfp ${DIR}/dl/${rootfs_name} -C ${MOUNT_PATH}
