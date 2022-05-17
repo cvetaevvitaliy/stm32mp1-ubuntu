@@ -7,7 +7,7 @@ DIR=$PWD
 . "${DIR}/version.sh"
 
 IMAGE_FILENAME="sdcard-stm32mp157.img"
-MOUNT_PATH="${DIR}/deploy/rootfs"
+MOUNT_PATH="${DIR}/deploy/rootfs_tmp"
 
 DOWNLOAD_LINK="https://rcn-ee.com/rootfs/eewiki/minfs/"
 
@@ -133,18 +133,21 @@ write_rootfs(){
         exit 1
     fi
 
+
+
     echo ""
-    echo "Copy Root File System"
-    if [ -d ./deploy/${UBUNTU_18_VERSION} ]; then
-        echo "Extract to ${CUR_PATH}/${UBUNTU_18_VERSION} "
+    echo "Extract and copy Root File System: ${DIR}/dl/${rootfs_name}"
+    if [ -f "${DIR}/dl/${rootfs_name}" ]; then
         # ubuntu-base-22.04-base-armhf.tar.gz
         # sudo tar xvfp ./deploy/${UBUNTU_18_VERSION}/*/*.tar -C ${MOUNT_PATH}
         # sudo tar xvfp ${DIR}/ubuntu-base-22.04-base-armhf.tar.gz -C ${MOUNT_PATH}
-        #sudo tar xvfp ${DIR}/rootfs.tar.gz -C ${MOUNT_PATH}
-        sudo cp -r ${DIR}/rootfs/.  ${MOUNT_PATH}
-        # sudo rsync -azvh ${DIR}/rootfs/.  ${MOUNT_PATH}
+        #sudo tar xzpf ${DIR}/deploy/rootfs.tar.gz -C ${MOUNT_PATH}
+        sudo tar xzpf ${DIR}/dl/rootfs.tar.gz -C ${MOUNT_PATH}
+        #sudo cp -ar ${DIR}/deploy/rootfs/.  ${MOUNT_PATH}
+        #sudo rsync -azvh ${DIR}/rootfs/.  ${MOUNT_PATH}
+        # sudo tar xfp ${DIR}/dl/${rootfs_name} -C ${MOUNT_PATH}
     else
-        echo "First need get rootfs, please make './build.sh ubuntu'"
+        echo "First need get rootfs"
         clean_loop
         exit 1
     fi
@@ -174,7 +177,7 @@ copy_kernel_and_modules(){
 
     echo ""
     echo "Copy Kernel Modules"
-    sudo tar xfv ./deploy/${kernel_ver}-modules.tar.gz -C ${MOUNT_PATH}/usr/
+    sudo tar xf ./deploy/${kernel_ver}-modules.tar.gz -C ${MOUNT_PATH}/usr/
 
     echo ""
     echo "Copy GPU video driver" # sudo depmod -a
@@ -208,8 +211,8 @@ copy_kernel_and_modules(){
     echo "File Systems Table (/etc/fstab)"
     sudo sh -c "echo '/dev/mmcblk0p4  /  auto  errors=remount-ro  0  1' >> ${MOUNT_PATH}/etc/fstab"
 
-    ls -l ${MOUNT_PATH}/lib/systemd/
-    ls -l ${MOUNT_PATH}/sbin/init
+    ls -l ${MOUNT_PATH}/
+    ls -l ${MOUNT_PATH}/home/
     
     sync
     case "$?" in

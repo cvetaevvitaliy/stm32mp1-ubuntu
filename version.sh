@@ -7,6 +7,14 @@ ARCH=$(uname -m)
 
 config="multi_v7_defconfig"
 
+# base rootfs
+link_ubuntu_relese="https://cdimage.ubuntu.com/ubuntu-base/releases/22.04/release"
+base_rootfs_name="ubuntu-base-22.04-base-armhf.tar.gz"
+
+# Googledrive link to rootfs
+fileid="1kEco22WrjYhaFoAfxaGbd41blzu6kYSC"
+rootfs_name="ubuntu-22.04-base-stm32mp1-armhf-16-05-2022.tar.gz"
+
 
 #arm
 KERNEL_ARCH=arm
