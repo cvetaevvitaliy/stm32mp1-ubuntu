@@ -1,13 +1,12 @@
 diff --git a/scripts/setlocalversion b/scripts/setlocalversion
-index bb709eda96cd..4300b9e1060a 100755
+index bb709eda96cd..3caced3bddf8 100755
 --- a/scripts/setlocalversion
 +++ b/scripts/setlocalversion
-@@ -54,7 +54,7 @@ scm_version()
- 			# If only the short version is requested, don't bother
- 			# running further git commands
- 			if $short; then
--				echo "+"
-+				#echo "+"
- 				return
- 			fi
- 			# If we are past a tagged commit (like
+@@ -33,6 +33,7 @@ scm_version()
+ {
+ 	local short
+ 	short=false
++	return
+ 
+ 	cd "$srctree"
+ 	if test -e .scmversion; then
