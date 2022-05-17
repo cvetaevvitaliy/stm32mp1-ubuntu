@@ -23,5 +23,12 @@ jobs:
       - name: Build kernel 
         working-directory: ./stm32mp1-ubuntu
         run: bash build-linux.sh
-        
+
+      - name: Get rootfs 
+        working-directory: ./stm32mp1-ubuntu
+        run: bash rootfs.sh
+
+      - name: Make rootfs 
+        working-directory: ./stm32mp1-ubuntu
+        run: bash create-rootfs.sh 
           
