@@ -31,4 +31,9 @@ jobs:
       - name: Make rootfs 
         working-directory: ./stm32mp1-ubuntu
         run: bash create-rootfs.sh 
-          
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: "Download build artifacts - Ubuntu 22.04 for STM32MP157c-DK2"
+          path: ${{runner.workspace}}/stm32mp1-ubuntu/stm32mp1-ubuntu/artifacts/*-Ubuntu-22.04-base-stm32mp157c-dk2.img
