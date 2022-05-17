@@ -9,29 +9,6 @@ DIR=$PWD
 IMAGE_FILENAME="sdcard-stm32mp157.img"
 MOUNT_PATH="${DIR}/deploy/rootfs_tmp"
 
-DOWNLOAD_LINK="https://rcn-ee.com/rootfs/eewiki/minfs/"
-
-
-#UBUNTU_18="ubuntu-18.04.6-minimal-armhf-2022-04-15.tar.xz"
-UBUNTU_18="ubuntu-20.04.4-minimal-armhf-2022-04-15.tar.xz"
-
-
-make_rootfs() {
-    echo "============================================"
-    echo "Create Ubuntu 18 image"
-    
-    if ! [ -f ${DIR}/dl/${UBUNTU_18} ]; then
-        wget -P ${DIR}/dl ${DOWNLOAD_LINK}${UBUNTU_18}
-    fi
-    
-    UBUNTU_18_VERSION="ubuntu-18"
-    if ! [ -d ${DIR}/deploy/${UBUNTU_18_VERSION} ]; then
-        mkdir -p ${DIR}/deploy/${UBUNTU_18_VERSION}
-        echo "Extract rootfs to '${DIR}/deploy/${UBUNTU_18_VERSION}'"
-        tar xvf ${DIR}/dl/${UBUNTU_18} -C ${DIR}/deploy/${UBUNTU_18_VERSION}
-    fi
-
-}
 
 init_image(){
 
@@ -226,6 +203,9 @@ copy_kernel_and_modules(){
     0) echo "Sync OK"  ;;
     *) echo "Error sync " ;;
     esac
+
+    mkdir -p ${DIR}/artifacts
+    cp -v ${DIR}/deploy/${IMAGE_FILENAME} ${DIR}/artifacts/$(date +'%d-%m-%Y')-Ubuntu-22.04-base-stm32mp157c-dk2.img
 }
 
 OPTIONS="${@:-allff}"
@@ -241,7 +221,6 @@ for option in ${OPTIONS}; do
 done
 
 
-make_rootfs
 
 init_image
 
