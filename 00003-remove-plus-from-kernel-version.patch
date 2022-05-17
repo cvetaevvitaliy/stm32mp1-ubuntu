@@ -1,0 +1,12 @@
+diff --git a/scripts/setlocalversion b/scripts/setlocalversion
+index bb709eda96cd..3caced3bddf8 100755
+--- a/scripts/setlocalversion
++++ b/scripts/setlocalversion
+@@ -33,6 +33,7 @@ scm_version()
+ {
+ 	local short
+ 	short=false
++	return
+ 
+ 	cd "$srctree"
+ 	if test -e .scmversion; then

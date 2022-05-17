@@ -566,6 +566,7 @@ function mk_ubuntu_18(){
     echo "${TAR_NAME}"
     # tar cfv - ./output/sdcard-stm32mp157.img | pv | xz -z -T0 - > ./output/${TAR_NAME}-full-sd-image.tar.xz
     pv ./output/sdcard-stm32mp157.img | gzip  > ./output/${TAR_NAME}-kernel-${KERNEL_VERSION}-full-sd-image.img.gz
+    echo "Image stored: /output/${TAR_NAME}-kernel-${KERNEL_VERSION}-full-sd-image.img.gz"
     
 }
 

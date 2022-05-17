@@ -1,0 +1,44 @@
+diff --git a/drivers/gpu/drm/panel/panel-simple.c b/drivers/gpu/drm/panel/panel-simple.c
+index 204674fccd64..afad51b712b9 100644
+--- a/drivers/gpu/drm/panel/panel-simple.c
++++ b/drivers/gpu/drm/panel/panel-simple.c
+@@ -3900,6 +3900,29 @@ static const struct panel_desc arm_rtsm = {
+ 	.bus_format = MEDIA_BUS_FMT_RGB888_1X24,
+ };
+ 
++static const struct drm_display_mode o4_lcd5_800_480_mode = {
++	.clock = 29700,
++	.hdisplay = 800,
++	.hsync_start = 800 + 15,
++	.hsync_end = 800 + 15 + 10,
++	.htotal = 800 + 15 + 10 + 14,
++	.vdisplay = 480,
++	.vsync_start = 480 + 98,
++	.vsync_end = 480 + 98 + 32,
++	.vtotal = 480 + 98 + 32 + 98,
++	.flags = DRM_MODE_FLAG_NHSYNC | DRM_MODE_FLAG_NVSYNC,
++};
++
++static const struct panel_desc o4_lcd5_800_480 = {
++	.modes = &o4_lcd5_800_480_mode,
++	.num_modes = 1,
++	.bpc = 6,
++	.size = {
++		.width = 100,
++		.height = 68,
++	},
++};
++
+ static const struct of_device_id platform_of_match[] = {
+ 	{
+ 		.compatible = "ampire,am-1280800n3tzqw-t00h",
+@@ -4300,6 +4323,9 @@ static const struct of_device_id platform_of_match[] = {
+ 	}, {
+ 		.compatible = "winstar,wf35ltiacd",
+ 		.data = &winstar_wf35ltiacd,
++	}, {
++		.compatible = "out4,o4-lcd5-800-480",
++		.data = &o4_lcd5_800_480,
+ 	}, {
+ 		/* Must be the last entry */
+ 		.compatible = "panel-dpi",

@@ -1,0 +1,45 @@
+on: workflow_dispatch
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          path: stm32mp1-ubuntu
+          
+    
+      - name: Install depends
+        run: sudo apt-get install -y zip lzop lzma gettext libmpc-dev u-boot-tools libncurses5-dev pv gzip flex bison ncurses-base build-essential qemu-user-static device-tree-compiler
+          
+      - name: Get submodules
+        working-directory: ./stm32mp1-ubuntu
+        run: |
+          git submodule update --init --recursive
+          git submodule update --recursive --remote
+
+      - name: Build U-boot and ARM trusted firmware
+        working-directory: ./stm32mp1-ubuntu
+        run: bash build-uboot.sh
+
+      - name: Build kernel 
+        working-directory: ./stm32mp1-ubuntu
+        run: bash build-linux.sh
+
+      - name: Get rootfs 
+        working-directory: ./stm32mp1-ubuntu
+        run: bash rootfs.sh
+
+      - name: Make rootfs 
+        working-directory: ./stm32mp1-ubuntu
+        run: bash create-rootfs.sh 
+
+      - name: ZIP artifact
+        run: |
+          mv -v ${{runner.workspace}}/stm32mp1-ubuntu/stm32mp1-ubuntu/artifacts/*.img ./
+          zip ubuntu-22.04-stm32mp157c-DK2.zip ./*.img
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: ubuntu-22.04-stm32mp157c-DK2
+          path: ubuntu-22.04-stm32mp157c-DK2.zip

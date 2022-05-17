@@ -1,9 +1,20 @@
 [submodule "u-boot"]
 	path = u-boot
-	url = https://github.com/u-boot/u-boot
-	branch = master
+	url = https://github.com/STMicroelectronics/u-boot
+	branch = v2020.10-stm32mp
 
-[submodule "armv7-lpae-multiplatform"]
-	path = armv7-lpae-multiplatform
-	url = https://github.com/RobertCNelson/armv7-lpae-multiplatform
-	branch = master
+[submodule "linux"]
+	path = linux
+	url = https://github.com/STMicroelectronics/linux
+	branch = v5.10-stm32mp
+
+[submodule "arm-trusted-firmware"]
+	path = arm-trusted-firmware
+	url = https://github.com/STMicroelectronics/arm-trusted-firmware
+	branch = v2.4-stm32mp
+
+[submodule "gcnano-binaries"]
+	path = gcnano-binaries
+	url = https://github.com/STMicroelectronics/gcnano-binaries
+	branch = gcnano-6.4.3-binaries
+
