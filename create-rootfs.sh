@@ -205,7 +205,8 @@ copy_kernel_and_modules(){
     esac
 
     mkdir -p ${DIR}/artifacts
-    cp -v ${DIR}/deploy/${IMAGE_FILENAME} ${DIR}/artifacts/$(date +'%d-%m-%Y')-Ubuntu-22.04-base-stm32mp157c-dk2.img
+    mv -v ${DIR}/deploy/${IMAGE_FILENAME} ${DIR}/artifacts/$(date +'%d-%m-%Y')-Ubuntu-22.04-base-${board}.img
+
 }
 
 OPTIONS="${@:-allff}"

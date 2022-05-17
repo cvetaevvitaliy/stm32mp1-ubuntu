@@ -22,10 +22,9 @@ fi
 
 apply_patch() {
 	cd "${DIR}/linux" || exit
-	git apply --whitespace=fix ${DIR}/00001-add-stm32mp157a-sodimm2-mx.patch
-	git apply --whitespace=fix ${DIR}/00002-add-panel-simle-o4_lcd5_800_480.patch
-	git apply --whitespace=fix ${DIR}/00003-remove-plus-from-kernel-version.patch
-	ls -l arch/arm/boot/dts/stm32mp157a-sodimm2-mx.dts
+	git apply -v --whitespace=fix ${DIR}/00001-add-stm32mp157a-sodimm2-mx.patch || { cd "${DIR}/" ; return 1 ; }
+	git apply -v --whitespace=fix ${DIR}/00002-add-panel-simle-o4_lcd5_800_480.patch || { cd "${DIR}/" ; return 1 ; }
+	git apply -v --whitespace=fix ${DIR}/00003-remove-plus-from-kernel-version.patch || { cd "${DIR}/" ; return 1 ; }
 	git diff arch/arm/boot/dts/Makefile
 
 	cd "${DIR}/" || exit

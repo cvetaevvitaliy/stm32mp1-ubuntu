@@ -19,6 +19,10 @@ mkdir -p "${DIR}/deploy/"
 
 build_uboot() {    
     cd ${DIR}/u-boot
+
+    echo "Apply patch"
+    git apply -v --whitespace=fix ${DIR}/00004-add-u-boot-stm32mp157a-sodimm2-mx.patch || { echo "Error apply patch"; }
+
     echo "============================================"
     echo "Start build U-Boot ${UBOOT_VERSION}"
     echo "Board: ${board}"
@@ -54,10 +58,15 @@ build_uboot() {
 build_arm_trusted_firmware() {
 
     cd ${DIR}/arm-trusted-firmware
+    echo "Apply patch"
+    git apply -v --whitespace=fix ${DIR}/00005-add-at-f-stm32mp157a-sodimm2-mx.patch || { echo "Error apply patch"; }
     echo "============================================"
     echo "Start build Arm Trusted Firmware "
-    #rm -r ./build
-    make clean
+    
+    if [ -d ${DIR}/arm-trusted-firmware/build ]; then 
+           rm -r ${DIR}/arm-trusted-firmware/build
+    fi
+
     make -C ./tools/fiptool \
         PLAT=stm32mp1 ARCH=aarch32 ARM_ARCH_MAJOR=7 CROSS_COMPILE=${CC} \
         STM32MP_SDMMC=1 STM32MP_EMMC=1 \
@@ -108,3 +117,5 @@ done
 build_uboot
 
 build_arm_trusted_firmware
+
+exit 0 ; 
