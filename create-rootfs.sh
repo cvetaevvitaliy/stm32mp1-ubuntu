@@ -195,6 +195,11 @@ copy_kernel_and_modules(){
     sudo cp -v ./wifi_firmware/brcmfmac43430-sdio.txt ${MOUNT_PATH}/lib/firmware/brcm/brcmfmac43430-sdio.st,${board}.txt
     
 
+    # add wellcome information
+    sudo sh -c "echo 'Build date: $(date +'%d/%m/%Y')' >> ${MOUNT_PATH}/etc/issue"
+    sudo sh -c "echo ' ' >> ${MOUNT_PATH}/etc/issue"
+    sudo sh -c "echo 'login: ubuntu' >> ${MOUNT_PATH}/etc/issue"
+    sudo sh -c "echo 'passw: root' >> ${MOUNT_PATH}/etc/issue"
 # activate welcome message
     # sudo chmod +x ${MOUNT_PATH}/etc/update-motd.d/00-header
     # sudo chmod +x ${MOUNT_PATH}/etc/update-motd.d/10-help-text
