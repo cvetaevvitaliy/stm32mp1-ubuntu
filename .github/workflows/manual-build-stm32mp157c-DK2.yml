@@ -36,10 +36,10 @@ jobs:
       - name: ZIP artifact
         run: |
           mv -v ${{runner.workspace}}/stm32mp1-ubuntu/stm32mp1-ubuntu/artifacts/*.img ./
-          zip ubuntu-22.04-stm32mp1.zip ./*.img
+          zip ubuntu-22.04-stm32mp157c-DK2.zip ./*.img
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: ubuntu-22.04-stm32mp1.zip
-          path: ubuntu-22.04-stm32mp1.zip
+          name: ubuntu-22.04-stm32mp157c-DK2.zip
+          path: ubuntu-22.04-stm32mp157c-DK2.zip
