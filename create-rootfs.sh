@@ -196,10 +196,12 @@ copy_kernel_and_modules(){
     
 
     # add wellcome information
-    sudo sh -c "echo 'Build date: $(date +'%d/%m/%Y')' >> ${MOUNT_PATH}/etc/issue"
+    sudo sh -c "echo 'Ubuntu 22.04 LTS \n \l' > ${MOUNT_PATH}/etc/issue"
+    sudo sh -c "echo 'Build: $(date +'%d/%m/%Y')' >> ${MOUNT_PATH}/etc/issue"
     sudo sh -c "echo ' ' >> ${MOUNT_PATH}/etc/issue"
     sudo sh -c "echo 'login: ubuntu' >> ${MOUNT_PATH}/etc/issue"
     sudo sh -c "echo 'passw: root' >> ${MOUNT_PATH}/etc/issue"
+     sudo sh -c "echo ' ' >> ${MOUNT_PATH}/etc/issue"
 # activate welcome message
     # sudo chmod +x ${MOUNT_PATH}/etc/update-motd.d/00-header
     # sudo chmod +x ${MOUNT_PATH}/etc/update-motd.d/10-help-text
