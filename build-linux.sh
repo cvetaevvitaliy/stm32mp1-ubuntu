@@ -63,6 +63,7 @@ make_kernel () {
     image="zImage"
 
     cd "${DIR}/linux" || exit
+	echo "Build Kernel: $(git branch --show-current)"
 	echo "-----------------------------"
 	echo "make -j${CORES} ARCH=${KERNEL_ARCH} CROSS_COMPILE=\"${CC}\" ${image} modules"
 	echo "-----------------------------"
@@ -94,7 +95,7 @@ make_kernel () {
 
 	if [ ! -f "${DIR}/deploy/${KERNEL_UTS}.${image}" ] ; then
 		export ERROR_MSG="File Generation Failure: [${KERNEL_UTS}.${image}]"
-		/bin/sh -e "${DIR}/scripts/error.sh" && { exit 1 ; }
+		/bin/sh -e "${DIR}/error.sh" && { exit 1 ; }
 	else
 		ls -lh "${DIR}/deploy/${KERNEL_UTS}.${image}"
         ls -lh "${DIR}/deploy/${image}"
@@ -105,9 +106,11 @@ make_kernel () {
 make_pkg () {
 	cd "${DIR}/linux" || exit
     #KERNEL_UTS=${BUILD}
+	branch=$(git branch --show-current)
 
 	deployfile="-${pkg}.tar.gz"
 	tar_options="--create --gzip --file"
+	#tar_options="-czvf"
 
 	if [ -f "${DIR}/deploy/${KERNEL_UTS}${deployfile}" ] ; then
 		rm -rf "${DIR}/deploy/${KERNEL_UTS}${deployfile}" || true
@@ -134,14 +137,14 @@ make_pkg () {
 
 	echo "Compressing ${KERNEL_UTS}${deployfile}..."
 	cd "${DIR}/deploy/tmp" || true
-	tar ${tar_options} "../${KERNEL_UTS}${deployfile}" ./*
+	tar ${tar_options} "${DIR}/deploy/${KERNEL_UTS}${deployfile}" ./*
 
 	cd "${DIR}/" || exit
 	rm -rf "${DIR}/deploy/tmp" || true
 
 	if [ ! -f "${DIR}/deploy/${KERNEL_UTS}${deployfile}" ] ; then
-		export ERROR_MSG="File Generation Failure: [${KERNEL_UTS}${deployfile}]"
-		/bin/sh -e "${DIR}/scripts/error.sh" && { exit 1 ; }
+		export ERROR_MSG="File Generation Failure: [${KERNEL_UTS}${deployfile}] branch: ${branch}"
+		/bin/sh -e "${DIR}/error.sh" && { exit 1 ; }
 	else
 		ls -lh "${DIR}/deploy/${KERNEL_UTS}${deployfile}"
 	fi
@@ -173,7 +176,7 @@ make_dtbs_pkg
 echo "-----------------------------"
 echo "Script Complete"
 echo "${KERNEL_UTS}" > kernel_version
-echo "eewiki.net: [user@localhost:~$ export kernel_version=${KERNEL_UTS}]"
+echo "[user@localhost:~$ export kernel_version=${KERNEL_UTS}]"
 echo "-----------------------------"
 
 #/bin/sh -e "${DIR}/create-rootfs.sh" || { exit 1 ; }

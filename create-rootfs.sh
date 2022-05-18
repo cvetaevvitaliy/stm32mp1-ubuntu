@@ -156,11 +156,11 @@ copy_kernel_and_modules(){
     echo "Copy Kernel Modules"
     sudo tar xf ./deploy/${kernel_ver}-modules.tar.gz -C ${MOUNT_PATH}/usr/
 
-    echo ""
-    echo "Copy GPU video driver" # sudo depmod -a
-    echo "first start, need rescan all modules: 'sudo depmod -a'"
-    sudo mkdir -p ${MOUNT_PATH}/lib/modules/${kernel_ver}/extra/
-    sudo cp -v ${DIR}/gcnano-driver-6.4.3/galcore.ko ${MOUNT_PATH}/lib/modules/${kernel_ver}/extra/
+    # echo ""
+    # echo "Copy GPU video driver" # sudo depmod -a
+    # echo "first start, need rescan all modules: 'sudo depmod -a'"
+    # sudo mkdir -p ${MOUNT_PATH}/lib/modules/${kernel_ver}/extra/
+    # sudo cp -v ${DIR}/gcnano-driver-6.4.3/galcore.ko ${MOUNT_PATH}/lib/modules/${kernel_ver}/extra/
 
     sudo sh -c "echo 'auto eth0' >> ${MOUNT_PATH}/etc/network/interfaces"
     sudo sh -c "echo 'iface eth0 inet dhcp' >> ${MOUNT_PATH}/etc/network/interfaces"
@@ -178,7 +178,7 @@ copy_kernel_and_modules(){
     sudo sh -c "echo ' ' >> ${MOUNT_PATH}/etc/issue"
     sudo sh -c "echo 'login: ubuntu' >> ${MOUNT_PATH}/etc/issue"
     sudo sh -c "echo 'passw: root' >> ${MOUNT_PATH}/etc/issue"
-     sudo sh -c "echo ' ' >> ${MOUNT_PATH}/etc/issue"
+    sudo sh -c "echo ' ' >> ${MOUNT_PATH}/etc/issue"
 # activate welcome message
     # sudo chmod +x ${MOUNT_PATH}/etc/update-motd.d/00-header
     # sudo chmod +x ${MOUNT_PATH}/etc/update-motd.d/10-help-text
@@ -205,6 +205,11 @@ copy_kernel_and_modules(){
     esac
 
     mkdir -p ${DIR}/artifacts
+
+    if [ -f "${DIR}/artifacts/$(date +'%d-%m-%Y')-Ubuntu-22.04-base-${board}.img" ]; then
+        rm ${DIR}/artifacts/$(date +'%d-%m-%Y')-Ubuntu-22.04-base-${board}.img
+    fi
+    
     mv -v ${DIR}/deploy/${IMAGE_FILENAME} ${DIR}/artifacts/$(date +'%d-%m-%Y')-Ubuntu-22.04-base-${board}.img
 
 }

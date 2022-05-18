@@ -3,8 +3,6 @@
 export LC_ALL=C
 DIR=$PWD
 
-UBOOT_VERSION="v2020.10"
-
 /bin/sh -e "${DIR}/gcc.sh" || { exit 1 ; }
 
 . "${DIR}/.CC"
@@ -24,7 +22,7 @@ build_uboot() {
     git apply -v --whitespace=fix ${DIR}/00004-add-u-boot-stm32mp157a-sodimm2-mx.patch || { echo "Error apply patch"; }
 
     echo "============================================"
-    echo "Start build U-Boot ${UBOOT_VERSION}"
+    echo "Start build U-Boot: $(git branch --show-current)"
     echo "Board: ${board}"
 
     make ARCH=arm CROSS_COMPILE=${CC} distclean
@@ -47,8 +45,8 @@ build_uboot() {
 
 	    cp -v u-boot.bin ${DIR}/deploy
 	else
-	    echo "U-Boot Build Failed"
-        exit 1
+        export ERROR_MSG="U-Boot: Build Failure: board ${board}"
+		/bin/sh -e "${DIR}/error.sh" && { exit 1 ; }
 	fi
 	
 	cd "${DIR}/" || exit 0
@@ -61,7 +59,7 @@ build_arm_trusted_firmware() {
     echo "Apply patch"
     git apply -v --whitespace=fix ${DIR}/00005-add-at-f-stm32mp157a-sodimm2-mx.patch || { echo "Error apply patch"; }
     echo "============================================"
-    echo "Start build Arm Trusted Firmware "
+    echo "Start build Arm Trust Firmware: ${board} $(git branch --show-current)"
     
     if [ -d ${DIR}/arm-trusted-firmware/build ]; then 
            rm -r ${DIR}/arm-trusted-firmware/build
@@ -84,6 +82,15 @@ build_arm_trusted_firmware() {
         BL33_CFG=${DIR}/u-boot/u-boot.dtb \
         BL33=${DIR}/u-boot/u-boot-nodtb.bin \
         all fip -j${CORES}
+
+    
+    echo "============================================"
+	if [ -f  ./build/stm32mp1/release/fip.bin ]; then
+	    echo "Arm Trust Firmware Build Finish"
+    else
+        export ERROR_MSG="Arm Trust Firmware: Build Failure: board ${board}: $(git branch --show-current)"
+		/bin/sh -e "${DIR}/error.sh" && { exit 1 ; }
+	fi    
 
 	if [ -f ${DIR}/deploy/tf-a-${board}.stm32 ]; then 
             rm ${DIR}/deploy/tf-a-${board}.stm32
@@ -114,8 +121,17 @@ for option in ${OPTIONS}; do
     esac
 done
 
+
 build_uboot
 
 build_arm_trusted_firmware
+
+echo ""
+echo "-----------------------------"
+echo "Script Complete: board name: ${board}"
+echo ""
+echo "Trusted U-boot:   ${DIR}/deploy/fib.bin"
+echo "Config RAM:       ${DIR}/deploy/tf-a-${board}.stm32"
+echo "-----------------------------"
 
 exit 0 ; 
