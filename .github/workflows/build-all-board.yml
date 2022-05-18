@@ -1,7 +1,7 @@
 on: workflow_dispatch
 jobs:
   build:
-    runs-on: ubuntu-20.04
+    runs-on: [self-hosted, ubuntu-20.04] 
     strategy:
       fail-fast: false
       # max-parallel: 4
@@ -35,11 +35,11 @@ jobs:
         run: git submodule update --recursive --remote   linux
 
       - name: Build kernel 
+        env:
+         HOSTNAME: Runner
+         USER: GitHub
         working-directory: ./stm32mp1-ubuntu
-        run: |
-          export HOSTNAME=Runner
-          export USER=GitHub
-          bash build-linux.sh
+        run: bash build-linux.sh
 
       - name: Get rootfs 
         working-directory: ./stm32mp1-ubuntu
