@@ -133,13 +133,14 @@ write_rootfs(){
 
 copy_kernel_and_modules(){
     #fbcon=rotate:3
+    unset boot_instance
 
     echo ""
     echo "Setup extlinux.conf"
     sudo mkdir -p ${MOUNT_PATH}/boot/extlinux/
     sudo sh -c "echo 'label Linux ${kernel_ver}' > ${MOUNT_PATH}/boot/extlinux/extlinux.conf"
     sudo sh -c "echo '    kernel /boot/vmlinuz-${kernel_ver}' >> ${MOUNT_PATH}/boot/extlinux/extlinux.conf"
-    sudo sh -c "echo '    append console=ttySTM0,115200 console=tty1,115200 root=/dev/mmcblk${boot_instance}p4 ro rootwait ' >> ${MOUNT_PATH}/boot/extlinux/extlinux.conf"
+    sudo sh -c "echo '    append console=ttySTM0,115200 console=tty1,115200 root=/dev/mmcblk\${boot_instance}p4 ro rootwait ' >> ${MOUNT_PATH}/boot/extlinux/extlinux.conf"
     sudo sh -c "echo '    fdtdir /boot/dtbs/${kernel_ver}/' >> ${MOUNT_PATH}/boot/extlinux/extlinux.conf"
 
 
