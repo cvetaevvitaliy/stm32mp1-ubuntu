@@ -1,7 +1,7 @@
 on: workflow_dispatch
 jobs:
   build:
-    runs-on: [self-hosted, ubuntu-20.04] 
+    runs-on: ubuntu-20.04 # TODO: need add self-hosted 
     strategy:
       fail-fast: false
       # max-parallel: 4
