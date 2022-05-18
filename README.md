@@ -36,7 +36,7 @@ For full automatic build run:
 ```bash
 ./build.sh 
 ```
-*NOTE: Default build Ubuntu 22.04 Choosing a distribution to build in development*
+*NOTE: Default build Ubuntu 22.04 Choosing a distribution to build in development.* <br>
 *New contributors are welcome in development!*
 
 For separate build, uboot, kernel and rootfs
@@ -103,6 +103,14 @@ cd u-boot
 
 Configure and Build: <br>
 
+**stm32mp157a-sodimm2-mx**
+```bash
+#user@localhost:~/u-boot$
+make ARCH=arm CROSS_COMPILE=${CC} distclean
+make ARCH=arm CROSS_COMPILE=${CC} stm32mp15_trusted_defconfig
+make ARCH=arm CROSS_COMPILE=${CC} DEVICE_TREE=stm32mp157a-sodimm2-mx all
+```
+
 **stm32mp157c-ev1**
 ```bash
 #user@localhost:~/u-boot$
@@ -140,6 +148,21 @@ make ARCH=arm CROSS_COMPILE=${CC} DEVICE_TREE=stm32mp157c-dk2 all
 ```bash
 git clone -b v2.4-stm32mp https://github.com/STMicroelectronics/arm-trusted-firmware
 cd arm-trusted-firmware
+```
+
+**stm32mp157a-sodimm2-mx**
+```bash
+make CROSS_COMPILE=${CC} \
+			PLAT=stm32mp1 \
+      ARCH=aarch32 \
+      ARM_ARCH_MAJOR=7 \
+      STM32MP_SDMMC=1 \
+      STM32MP_EMMC=1 \
+      AARCH32_SP=sp_min \
+      DTB_FILE_NAME=stm32mp157a-sodimm2-mx.dtb \
+      BL33_CFG=../u-boot/u-boot.dtb \
+      BL33=../u-boot/u-boot-nodtb.bin \
+      all fip
 ```
 
 **stm32mp157c-ev1**
@@ -216,7 +239,10 @@ cd linux
 
 **Build:**
 ```bash
+# ST defconfig 
 make ARCH=arm CROSS_COMPILE=${CC} multi_v7_defconfig fragment-01-multiv7_cleanup.config fragment-02-multiv7_addons.config
+
+# Choose the kernel modules you need
 make ARCH=arm CROSS_COMPILE=${CC} menuconfig
 make ARCH=arm CROSS_COMPILE=${CC} zImage modules -j16
 
@@ -362,6 +388,14 @@ brw-rw---- 1 root disk 259, 10 лис  7 13:31 /dev/loop0p4
 ```
 
 **Install U-Boot bootloader:**
+
+**stm32mp157a-sodimm2-mx**
+```bash
+#user@localhost:~$
+sudo dd if=./arm-trusted-firmware/build/stm32mp1/release/tf-a-stm32mp157a-sodimm2-mx.stm32 of=${LOOP_DEVICE}p1
+sudo dd if=./arm-trusted-firmware/build/stm32mp1/release/tf-a-stm32mp157a-sodimm2-mx.stm32 of=${LOOP_DEVICE}p2
+sudo dd if=./arm-trusted-firmware/build/stm32mp1/release/fip.bin of=${LOOP_DEVICE}p3
+```
 
 **stm32mp157c-ev1**
 ```bash
