@@ -163,7 +163,7 @@ copy_kernel_and_modules(){
     # sudo mkdir -p ${MOUNT_PATH}/lib/modules/${kernel_ver}/extra/
     # sudo cp -v ${DIR}/gcnano-driver-6.4.3/galcore.ko ${MOUNT_PATH}/lib/modules/${kernel_ver}/extra/
 
-    sudo sh -c "echo 'auto eth0' >> ${MOUNT_PATH}/etc/network/interfaces"
+    sudo sh -c "echo 'allow-hotplug eth0' >> ${MOUNT_PATH}/etc/network/interfaces"
     sudo sh -c "echo 'iface eth0 inet dhcp' >> ${MOUNT_PATH}/etc/network/interfaces"
 
     echo ""
