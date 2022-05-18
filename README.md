@@ -1,8 +1,9 @@
-# Ubuntu 18.04, 20.04, Debian 10, 11 for stm32mp157
-This repo for build and run Ubuntu on stm32mp157 <br> 
+# Ubuntu 18.04, 20.04, 22.04 Debian 10, 11 for stm32mp1
+This repo for build Ubuntu/Debian on stm32mp1xx CPU <br> 
 Availability
 Boards:
 
+  * [EV-STM32MP157-SODIMM](http://otladka.com.ua/index.php?option=com_virtuemart&page=shop.product_details&flypage=vmj_naru.tpl&category_id=41&product_id=284&Itemid=71)
   * [Discovery kit with STM32MP157D MPU 88 at Digi-Key](https://www.digikey.com/en/products/detail/stmicroelectronics/STM32MP157D-DK1/13536964)
   * [Discovery kit with STM32MP157F MPU 47 at Digi-Key](https://www.digikey.com/en/products/detail/stmicroelectronics/STM32MP157F-DK2/13536968)
   * [Evaluation board with STM32MP157D MPU 43 at Digi-Key](https://www.digikey.com/en/products/detail/stmicroelectronics/STM32MP157D-EV1/13536967)
@@ -12,15 +13,19 @@ Boards:
 Running a recent supported release of Debian, Fedora or Ubuntu on a x86 64bit based PC; without OS Virtualization Software. <br>
 Many of the listed commands assume `/bin/bash` as the default shell. <br> 
 
-ARM Cross Compiler – Linaro: https://www.linaro.org <br>
-  * Linaro Toolchain Binaries: https://www.linaro.org/downloads/ <br>
+ARM Cross Compiler – GCC: <br>
+  * ARM Linux GCC Toolchain Binaries: https://mirrors.edge.kernel.org/pub/tools/crosstool/files/bin/x86_64/ <br>
 
 Bootloader <br>
   * Das U-Boot – the Universal Boot Loader: http://www.denx.de/wiki/U-Boot <br>
-  * Source: https://github.com/u-boot/u-boot/  <br>
+  * Source: https://github.com/STMicroelectronics/u-boot  <br>
+
+ATF <br>
+  * arm trusted firmware - https://trustedfirmware-a.readthedocs.io/en/latest/
+  * Source: https://github.com/STMicroelectronics/arm-trusted-firmware 
 
 Linux Kernel <br>
-  * Linus’s Mainline tree: https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git <br>
+  * ST Mainline tree: https://github.com/STMicroelectronics/linux <br>
 
 ARM based rootfs <br>
   * Debian: https://www.debian.org <br>
@@ -31,17 +36,18 @@ For full automatic build run:
 ```bash
 ./build.sh 
 ```
+*NOTE: Default build Ubuntu 22.04 Choosing a distribution to build in development*
+*New contributors are welcome in development!*
 
 For separate build, uboot, kernel and rootfs
 ```bash
-./build.sh uboot
-./build.sh kernel
-./build.sh ubuntu
-./build.sh debian
+./build-uboot.sh
+./build-linux.sh
 ```
 For make sdcard.img image
 ```bash
-./build.sh mkimage
+./rootfs.sh         # for get base rootfs sceleton
+./create-rootfs.sh  # make sd card image
 ```
 
 ***update in progress build scripts**
@@ -50,15 +56,21 @@ For make sdcard.img image
 # Manual build 
 For manual build, follow these steps.
 
+# Depends
+
+```
+sudo apt install flex bison ncurses-base build-essential qemu-user-static device-tree-compiler
+```
+
 ## ARM Cross Compiler: GCC
 This is a pre-built (64bit) version of GCC that runs on generic linux, sorry (32bit) x86 users, it’s time to upgrade…
 Download/Extract:
 
 ```bash
 #user@localhost:~$
-wget -c https://releases.linaro.org/components/toolchain/binaries/6.5-2018.12/arm-linux-gnueabihf/gcc-linaro-6.5.0-2018.12-x86_64_arm-linux-gnueabihf.tar.xz
-tar xf gcc-linaro-6.5.0-2018.12-x86_64_arm-linux-gnueabihf.tar.xz
-export CC=`pwd`/gcc-linaro-6.5.0-2018.12-x86_64_arm-linux-gnueabihf/bin/arm-linux-gnueabihf-
+wget -c https://mirrors.edge.kernel.org/pub/tools/crosstool/files/bin/x86_64/10.3.0/x86_64-gcc-10.3.0-nolibc-arm-linux-gnueabi.tar.gz
+tar xf x86_64-gcc-10.3.0-nolibc-arm-linux-gnueabi.tar.gz
+export CC=`pwd`/gcc-10.3.0-nolibc/arm-linux-gnueabi/bin/arm-linux-gnueabi-
 ```
 
 Test Cross Compiler:
@@ -70,8 +82,8 @@ ${CC}gcc --version
 
 ```bash
 #Test Output:
-arm-linux-gnueabihf-gcc (Linaro GCC 6.5-2018.12) 6.5.0
-Copyright (C) 2017 Free Software Foundation, Inc.
+arm-linux-gnueabi-gcc (GCC) 10.3.0
+Copyright (C) 2020 Free Software Foundation, Inc.
 This is free software; see the source for copying conditions.  There is NO
 warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 ```
@@ -85,8 +97,8 @@ Download:  <br>
 
 ```bash
 #user@localhost:~$
-git clone -b v2021.10 https://github.com/u-boot/u-boot --depth=1
-cd u-boot/
+git clone -b v2020.10-stm32mp https://github.com/STMicroelectronics/u-boot
+cd u-boot
 ```
 
 Configure and Build: <br>
@@ -95,7 +107,7 @@ Configure and Build: <br>
 ```bash
 #user@localhost:~/u-boot$
 make ARCH=arm CROSS_COMPILE=${CC} distclean
-make ARCH=arm CROSS_COMPILE=${CC} stm32mp15_basic_defconfig
+make ARCH=arm CROSS_COMPILE=${CC} stm32mp15_trusted_defconfig
 make ARCH=arm CROSS_COMPILE=${CC} DEVICE_TREE=stm32mp157c-ev1 all
 ```
 
@@ -103,7 +115,7 @@ make ARCH=arm CROSS_COMPILE=${CC} DEVICE_TREE=stm32mp157c-ev1 all
 ```bash
 #user@localhost:~/u-boot$
 make ARCH=arm CROSS_COMPILE=${CC} distclean
-make ARCH=arm CROSS_COMPILE=${CC} stm32mp15_basic_defconfig
+make ARCH=arm CROSS_COMPILE=${CC} stm32mp15_trusted_defconfig
 make ARCH=arm CROSS_COMPILE=${CC} DEVICE_TREE=stm32mp157c-ed1 all
 ```
 
@@ -111,7 +123,7 @@ make ARCH=arm CROSS_COMPILE=${CC} DEVICE_TREE=stm32mp157c-ed1 all
 ```bash
 #user@localhost:~/u-boot$
 make ARCH=arm CROSS_COMPILE=${CC} distclean
-make ARCH=arm CROSS_COMPILE=${CC} stm32mp15_basic_defconfig
+make ARCH=arm CROSS_COMPILE=${CC} stm32mp15_trusted_defconfig
 make ARCH=arm CROSS_COMPILE=${CC} DEVICE_TREE=stm32mp157a-dk1 all
 ```
 
@@ -119,8 +131,75 @@ make ARCH=arm CROSS_COMPILE=${CC} DEVICE_TREE=stm32mp157a-dk1 all
 ```bash
 #user@localhost:~/u-boot$
 make ARCH=arm CROSS_COMPILE=${CC} distclean
-make ARCH=arm CROSS_COMPILE=${CC} stm32mp15_basic_defconfig
+make ARCH=arm CROSS_COMPILE=${CC} stm32mp15_trusted_defconfig
 make ARCH=arm CROSS_COMPILE=${CC} DEVICE_TREE=stm32mp157c-dk2 all
+```
+
+# arm-trusted-firmware
+
+```bash
+git clone -b v2.4-stm32mp https://github.com/STMicroelectronics/arm-trusted-firmware
+cd arm-trusted-firmware
+```
+
+**stm32mp157c-ev1**
+```bash
+make CROSS_COMPILE=${CC} \
+			PLAT=stm32mp1 \
+      ARCH=aarch32 \
+      ARM_ARCH_MAJOR=7 \
+      STM32MP_SDMMC=1 \
+      STM32MP_EMMC=1 \
+      AARCH32_SP=sp_min \
+      DTB_FILE_NAME=stm32mp157c-ev1.dtb \
+      BL33_CFG=../u-boot/u-boot.dtb \
+      BL33=../u-boot/u-boot-nodtb.bin \
+      all fip
+```
+
+**stm32mp157c-ed1**
+```bash
+make CROSS_COMPILE=${CC} \
+			PLAT=stm32mp1 \
+      ARCH=aarch32 \
+      ARM_ARCH_MAJOR=7 \
+      STM32MP_SDMMC=1 \
+      STM32MP_EMMC=1 \
+      AARCH32_SP=sp_min \
+      DTB_FILE_NAME=stm32mp157c-ed1.dtb \
+      BL33_CFG=../u-boot/u-boot.dtb \
+      BL33=../u-boot/u-boot-nodtb.bin \
+      all fip
+```
+
+**stm32mp157a-dk1**
+```bash
+make CROSS_COMPILE=${CC} \
+			PLAT=stm32mp1 \
+      ARCH=aarch32 \
+      ARM_ARCH_MAJOR=7 \
+      STM32MP_SDMMC=1 \
+      STM32MP_EMMC=1 \
+      AARCH32_SP=sp_min \
+      DTB_FILE_NAME=stm32mp157a-dk1.dtb \
+      BL33_CFG=../u-boot/u-boot.dtb \
+      BL33=../u-boot/u-boot-nodtb.bin \
+      all fip
+```
+
+**stm32mp157c-dk2**
+```bash
+make CROSS_COMPILE=${CC} \
+			PLAT=stm32mp1 \
+      ARCH=aarch32 \
+      ARM_ARCH_MAJOR=7 \
+      STM32MP_SDMMC=1 \
+      STM32MP_EMMC=1 \
+      AARCH32_SP=sp_min \
+      DTB_FILE_NAME=stm32mp157c-dk2.dtb \
+      BL33_CFG=../u-boot/u-boot.dtb \
+      BL33=../u-boot/u-boot-nodtb.bin \
+      all fip
 ```
 
 
@@ -130,26 +209,34 @@ This script will build the kernel, modules, device tree binaries and copy them t
 Download:
 ```bash
 #user@localhost:~$
-git clone https://github.com/RobertCNelson/armv7-lpae-multiplatform
-cd armv7-lpae-multiplatform/
+git clone -b v5.10-stm32mp https://github.com/STMicroelectronics/linux
+cd linux
 ```
 
-**For v5.10.x (Longterm 5.10.x):**
-```bash
-#user@localhost:~/armv7-lpae-multiplatform$
-git checkout origin/v5.10.x -b tmp
-```
-
-**For v5.15.x (Longterm 5.15.x):**
-```bash
-#user@localhost:~/armv7-lpae-multiplatform$
-git checkout origin/v5.15.x -b tmp
-```
 
 **Build:**
 ```bash
-#user@localhost:~/armv7-lpae-multiplatform$
-./build_kernel.sh
+make ARCH=arm CROSS_COMPILE=${CC} multi_v7_defconfig fragment-01-multiv7_cleanup.config fragment-02-multiv7_addons.config
+make ARCH=arm CROSS_COMPILE=${CC} menuconfig
+make ARCH=arm CROSS_COMPILE=${CC} zImage modules -j16
+
+# build dts
+make ARCH=arm CROSS_COMPILE=${CC} dtbs
+
+# install kernel modules to pach
+mkdir -p ../deploy
+cp -v arch/arm/boot/zImage ../deploy
+mkdir -p ../deploy/modules
+make ARCH=arm CROSS_COMPILE=${CC} modules_install INSTALL_MOD_PATH="../deploy/modules"
+
+# install dtsb files to pach
+mkdir -p ../deploy/dtsb
+make ARCH=arm CROSS_COMPILE=${CC} dtbs_install INSTALL_DTBS_PATH=../deploy/dtsb
+
+# export kernel version 
+export kernel_ver=$(cat "include/generated/utsrelease.h" | awk '{print $3}' | sed 's/\"//g' )
+echo ${kernel_ver}
+cd ..
 ```
 
 ## Root File System
@@ -220,12 +307,16 @@ check output dd:
 
 **Create Partition Layout:**
 ```bash
-sudo sgdisk --resize-table=128 -a 1 \
-        -n 1:34:545    -c 1:fsbl1   \
-        -n 2:546:1057  -c 2:fsbl2   \
-        -n 3:1058:5153 -c 3:ssbl    \
-        -n 4:5154:     -c 4:rootfs  \
-        -p ${DISK}
+export IMAGE_FILENAME="sdcard-stm32mp157.img"
+dd if=/dev/zero of=${DIR}/deploy/${IMAGE_FILENAME} bs=4096M count=2
+
+sgdisk --resize-table=128 -a 1 \
+            -n 1:34:545    -c 1:fsbl1   \
+            -n 2:546:1057  -c 2:fsbl2   \
+            -n 3:1058:5153 -c 3:fip    \
+            -n 4:5154:     -c 4:rootfs  \
+            -p ./deploy/${IMAGE_FILENAME}
+            
 ```
 
 check output sgdisk:
@@ -250,16 +341,16 @@ check output sgdisk:
 **Set legacy BIOS partition:**
 
 ```bash
-sudo sgdisk -A 4:set:2 ${DISK}
+sgdisk -A 4:set:2 ./deploy/${IMAGE_FILENAME}
 ```
 
 **Create loop device**
 ```bash
-sudo losetup --partscan --show --find ${DISK}
+ LOOP_DEVICE=$(sudo losetup --partscan --show --find ./deploy/${IMAGE_FILENAME})
 ```
 Check mounted partition:
 ```
-ls -l /dev/loop0*
+ ls -l ${LOOP_DEVICE}*
 ```
 ```bash
 #user@localhost:~$ ls -l /dev/loop0*
@@ -271,79 +362,95 @@ brw-rw---- 1 root disk 259, 10 лис  7 13:31 /dev/loop0p4
 ```
 
 **Install U-Boot bootloader:**
+
+**stm32mp157c-ev1**
 ```bash
 #user@localhost:~$
-sudo dd if=./u-boot/u-boot-spl.stm32 of=/dev/loop0p1
-sudo dd if=./u-boot/u-boot-spl.stm32 of=/dev/loop0p2
-sudo dd if=./u-boot/u-boot.img of=/dev/loop0p3
+sudo dd if=./arm-trusted-firmware/build/stm32mp1/release/tf-a-stm32mp157c-ev1.stm32 of=${LOOP_DEVICE}p1
+sudo dd if=./arm-trusted-firmware/build/stm32mp1/release/tf-a-stm32mp157c-ev1.stm32 of=${LOOP_DEVICE}p2
+sudo dd if=./arm-trusted-firmware/build/stm32mp1/release/fip.bin of=${LOOP_DEVICE}p3
 ```
+
+**stm32mp157c-ed1**
+```bash
+#user@localhost:~$
+sudo dd if=./arm-trusted-firmware/build/stm32mp1/release/tf-a-stm32mp157c-ed1.stm32 of=${LOOP_DEVICE}p1
+sudo dd if=./arm-trusted-firmware/build/stm32mp1/release/tf-a-stm32mp157c-ed1.stm32 of=${LOOP_DEVICE}p2
+sudo dd if=./arm-trusted-firmware/build/stm32mp1/release/fip.bin of=${LOOP_DEVICE}p3
+```
+
+**stm32mp157a-dk1**
+```bash
+#user@localhost:~$
+sudo dd if=./arm-trusted-firmware/build/stm32mp1/release/tf-a-stm32mp157a-dk1.stm32 of=${LOOP_DEVICE}p1
+sudo dd if=./arm-trusted-firmware/build/stm32mp1/release/tf-a-stm32mp157a-dk1.stm32 of=${LOOP_DEVICE}p2
+sudo dd if=./arm-trusted-firmware/build/stm32mp1/release/fip.bin of=${LOOP_DEVICE}p3
+```
+
+**stm32mp157c-dk2**
+```bash
+#user@localhost:~$
+sudo dd if=./arm-trusted-firmware/build/stm32mp1/release/tf-a-stm32mp157c-dk2.stm32 of=${LOOP_DEVICE}p1
+sudo dd if=./arm-trusted-firmware/build/stm32mp1/release/tf-a-stm32mp157c-dk2.stm32 of=${LOOP_DEVICE}p2
+sudo dd if=./arm-trusted-firmware/build/stm32mp1/release/fip.bin of=${LOOP_DEVICE}p3
+```
+
+
 
 **Format RootFS Partition:**
 ```bash
-sudo mkfs.ext4 -L rootfs /dev/loop0p4
+sudo mkfs.ext4 -L rootfs ${LOOP_DEVICE}p4
 ```
 
 **Mount rootfs file system**
 ```bash
-sudo mkdir -p /mnt/rootfs
-sudo mount /dev/loop0p4 /mnt/rootfs/
+sudo mkdir -p deploy/rootfs
+MOUNT_PATH=deploy/rootfs
+sudo mount ${LOOP_DEVICE}p4 ${MOUNT_PATH}
 ```
 
 ## Install Kernel and Root File System
-To help new users, since the kernel version can change on a daily basis. The kernel building scripts listed on this page will now give you a hint of what kernel version was built.
-```bash
------------------------------
-Script Complete
-eewiki.net: [user@localhost:~$ export kernel_version=5.X.Y-Z]
------------------------------
-```
-
-Copy and paste that “export kernel_version=5.X.Y-Z” exactly as shown in your own build/desktop environment and hit enter to create an environment variable to be used later.
-
-```bash
-export kernel_version=5.X.Y-Z
-```
 
 **Copy Root File System**
 ```bash
 #Debian; Root File System: user@localhost:~$
-sudo tar xfvp ./debian-*-*-armhf-*/armhf-rootfs-*.tar -C /mnt/rootfs/
+sudo tar xfvp ./debian-*-*-armhf-rootfs-*.tar -C ${MOUNT_PATH}
 sync
 ```
 
 ```bash
 #Ubuntu; Root File System: user@localhost:~$
-sudo tar xfvp ./ubuntu-*-*-armhf-*/armhf-rootfs-*.tar -C /mnt/rootfs/
+sudo tar xfvp ./ubuntu-base-XX.XX-base-armhf.tar.gz -C ${MOUNT_PATH}
 sync
 ```
 
 **Setup extlinux.conf**
 ```bash
 #user@localhost:~$
-sudo mkdir -p /mnt/rootfs/boot/extlinux/
-sudo sh -c "echo 'label Linux ${kernel_version}' > /mnt/rootfs/boot/extlinux/extlinux.conf"
-sudo sh -c "echo '    kernel /boot/vmlinuz-${kernel_version}' >> /mnt/rootfs/boot/extlinux/extlinux.conf"
-sudo sh -c "echo '    append console=ttySTM0,115200 console=tty1,115200 console=tty0,115200 fbcon=rotate:3 root=/dev/mmcblk0p4 ro rootfstype=ext4 rootwait' >> /mnt/rootfs/boot/extlinux/extlinux.conf"
-sudo sh -c "echo '    fdtdir /boot/dtbs/${kernel_version}/' >> /mnt/rootfs/boot/extlinux/extlinux.conf"
+sudo mkdir -p ${MOUNT_PATH}/boot/extlinux/
+sudo sh -c "echo 'label Linux ${kernel_ver}' > ${MOUNT_PATH}/boot/extlinux/extlinux.conf"
+sudo sh -c "echo '    kernel /boot/vmlinuz-${kernel_ver}' >> ${MOUNT_PATH}/boot/extlinux/extlinux.conf"
+sudo sh -c "echo '    append console=ttySTM0,115200 console=tty1,115200 root=/dev/mmcblk${boot_instance}p4 ro rootwait ' >> ${MOUNT_PATH}/boot/extlinux/extlinux.conf"
+sudo sh -c "echo '    fdtdir /boot/dtbs/${kernel_ver}/' >> ${MOUNT_PATH}/boot/extlinux/extlinux.conf"
 ```
 
 **Copy Kernel Image**
 ```bash
 #user@localhost:~$
-sudo cp -v ./armv7-lpae-multiplatform/deploy/${kernel_version}.zImage /mnt/rootfs/boot/vmlinuz-${kernel_version}
+sudo cp -v ./deploy/${kernel_ver}.zImage ${MOUNT_PATH}/boot/vmlinuz-${kernel_ver}
 ```
 
 **Copy Kernel Device Tree Binaries**
 ```bash
 #user@localhost:~$
-sudo mkdir -p /mnt/rootfs/boot/dtbs/${kernel_version}/
-sudo tar xfv ./armv7-lpae-multiplatform/deploy/${kernel_version}-dtbs.tar.gz -C /mnt/rootfs/boot/dtbs/${kernel_version}/
+sudo mkdir -p ${MOUNT_PATH}/boot/dtbs/${kernel_ver}/
+sudo cp -r ./deploy/dtsb/* ${MOUNT_PATH}/boot/dtbs/${kernel_ver}/
 ```
 
 **Copy Kernel Modules**
 ```bash
 #user@localhost:~$
-sudo tar xfv ./armv7-lpae-multiplatform/deploy/${kernel_version}-modules.tar.gz -C /mnt/rootfs/
+sudo cp -r ./deploy/modules/. ${MOUNT_PATH}/usr/
 ```
 
 **File Systems Table (/etc/fstab)**
@@ -355,20 +462,22 @@ sudo sh -c "echo '/dev/mmcblk0p4  /  auto  errors=remount-ro  0  1' >> /mnt/root
 **For DK2 board. WiFi bin and config files**
 ```bash
 #user@localhost:~/$
-wget -c https://raw.githubusercontent.com/STMicroelectronics/meta-st-stm32mp/dunfell/recipes-kernel/linux-firmware/linux-firmware/brcmfmac43430-sdio.txt 
-wget -c https://github.com/murata-wireless/cyw-fmac-fw/raw/master/cyfmac43430-sdio.bin
-wget -c https://github.com/murata-wireless/cyw-fmac-fw/raw/master/cyfmac43430-sdio.1DX.clm_blob
- 
-sudo mkdir -p /mnt/rootfs/lib/firmware/brcm/
- 
-sudo cp -v ./brcmfmac43430* /mnt/rootfs/lib/firmware/brcm/
-sudo cp -v ./brcmfmac43430-sdio.txt /mnt/rootfs/lib/firmware/brcm/brcmfmac43430-sdio.st,stm32mp157c-dk2.txt
+mkdir wifi
+wget -P wifi https://github.com/cvetaevvitaliy/stm32mp1-ubuntu/raw/master/wifi_firmware/cyfmac43430-sdio.bin
+wget -P wifi https://github.com/cvetaevvitaliy/stm32mp1-ubuntu/raw/master/wifi_firmware/cyfmac43430-sdio.1DX.clm_blob
+wget -P wifi https://github.com/cvetaevvitaliy/stm32mp1-ubuntu/raw/master/wifi_firmware/brcmfmac43430-sdio.txt
+
+sudo mkdir -p ${MOUNT_PATH}/lib/firmware/brcm/
+sudo cp -v ./wifi/brcmfmac43430-sdio.txt ${MOUNT_PATH}/lib/firmware/brcm/brcmfmac43430-sdio.st,stm32mp157c-dk2.txt
+sudo cp -v ./wifi/cyfmac43430-sdio.bin ${MOUNT_PATH}/lib/firmware/brcm/brcmfmac43430-sdio.bin
+sudo cp -v ./wifi/cyfmac43430-sdio.1DX.clm_blob ${MOUNT_PATH}/lib/firmware/brcm/brcmfmac43430-sdio.clm_blob
+
 ```
 
 **Finish:**
 ```bash
 sync
-sudo umount /mnt/rootfs
+sudo umount ${MOUNT_PATH}
 sudo losetup -D
 ```
 
