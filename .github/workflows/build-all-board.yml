@@ -25,16 +25,6 @@ jobs:
         run: |
           git submodule update --recursive --remote   u-boot
           git submodule update --recursive --remote   arm-trusted-firmware
-      
-      - name: Set env
-        working-directory: ./stm32mp1-ubuntu
-        run: |
-          echo $HOSTNAME
-          echo $USER
-          export HOSTNAME=Runner
-          export USER=GitHub
-          echo $HOSTNAME
-          echo $USER
 
       - name: Build U-boot and ARM trusted firmware
         working-directory: ./stm32mp1-ubuntu
@@ -46,7 +36,10 @@ jobs:
 
       - name: Build kernel 
         working-directory: ./stm32mp1-ubuntu
-        run: bash build-linux.sh
+        run: |
+          export HOSTNAME=Runner
+          export USER=GitHub
+          bash build-linux.sh
 
       - name: Get rootfs 
         working-directory: ./stm32mp1-ubuntu
