@@ -115,7 +115,23 @@ for option in ${OPTIONS}; do
     # echo "processing option: $option"
     case $option in
     stm32mp157a-sodimm2-mx) board=${OPTIONS} ;;
-    stm32mp157c-dk2) board={OPTIONS} ;;
+    stm32mp157c-dk2) board=${OPTIONS} ;;
+    stm32mp153c-dhcom-drc02) board=${OPTIONS} ;;
+    stm32mp157a-avenger96) board=${OPTIONS} ;;
+    stm32mp157a-ev1) board=${OPTIONS} ;;
+    stm32mp157a-iot-box) board=${OPTIONS} ;;
+    stm32mp157a-stinger96) board=${OPTIONS} ;;
+    stm32mp157c-dhcom-pdk2) board=${OPTIONS} ;;
+    stm32mp157c-ed1) board=${OPTIONS} ;;
+    stm32mp157c-ev1) board=${OPTIONS} ;;
+    stm32mp157c-lxa-mc1) board=${OPTIONS} ;;
+    stm32mp157c-odyssey) board=${OPTIONS} ;;
+    stm32mp157d-dk1) board=${OPTIONS} ;;
+    stm32mp157d-ed1) board=${OPTIONS} ;;
+    stm32mp157d-ev1) board=${OPTIONS} ;;
+    stm32mp157f-dk2) board=${OPTIONS} ;;
+    stm32mp157f-ed1) board=${OPTIONS} ;;
+    stm32mp157f-ev1) board=${OPTIONS} ;;
 
     *) board="stm32mp157c-dk2" ;;
     esac
