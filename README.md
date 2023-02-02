@@ -59,7 +59,7 @@ For manual build, follow these steps.
 # Depends
 
 ```
-sudo apt install flex bison ncurses-base build-essential qemu-user-static device-tree-compiler
+sudo apt install flex bison ncurses-base build-essential qemu-user-static device-tree-compiler git libssl-dev
 ```
 
 ## ARM Cross Compiler: GCC
