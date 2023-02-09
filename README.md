@@ -59,7 +59,7 @@ For manual build, follow these steps.
 # Depends
 
 ```
-sudo apt install flex bison ncurses-base build-essential qemu-user-static device-tree-compiler
+sudo apt install flex bison ncurses-base build-essential qemu-user-static device-tree-compiler git libssl-dev libncurses-dev libgmp-dev libmpc-dev
 ```
 
 ## ARM Cross Compiler: GCC
@@ -146,6 +146,7 @@ make ARCH=arm CROSS_COMPILE=${CC} DEVICE_TREE=stm32mp157c-dk2 all
 # arm-trusted-firmware
 
 ```bash
+cd ..
 git clone -b v2.4-stm32mp https://github.com/STMicroelectronics/arm-trusted-firmware
 cd arm-trusted-firmware
 ```
@@ -232,6 +233,7 @@ This script will build the kernel, modules, device tree binaries and copy them t
 Download:
 ```bash
 #user@localhost:~$
+cd ..
 git clone -b v5.10-stm32mp https://github.com/STMicroelectronics/linux
 cd linux
 ```
@@ -316,23 +318,9 @@ tar xf ubuntu-18.04.6-minimal-armhf-2021-11-02.tar.xz
 
 Setup image for flash to microSD card
 
-**Create image:**
+**Create image and Partition Layout:**
 ```bash
-sudo dd if=/dev/zero of=~/sdcard.img bs=4096M count=2
-export DISK=~/sdcard.img
-```
-
-check output dd:
-```bash
-# check output:
-# 0+2 records in
-# 0+2 records out
-# 4294959104 bytes (4,3 GB, 4,0 GiB) copied, 13,5095 s, 318 MB/s
-```
-
-
-**Create Partition Layout:**
-```bash
+export DIR=$(pwd)
 export IMAGE_FILENAME="sdcard-stm32mp157.img"
 dd if=/dev/zero of=${DIR}/deploy/${IMAGE_FILENAME} bs=4096M count=2
 
@@ -471,7 +459,7 @@ sudo sh -c "echo '    fdtdir /boot/dtbs/${kernel_ver}/' >> ${MOUNT_PATH}/boot/ex
 **Copy Kernel Image**
 ```bash
 #user@localhost:~$
-sudo cp -v ./deploy/${kernel_ver}.zImage ${MOUNT_PATH}/boot/vmlinuz-${kernel_ver}
+sudo cp -v ./deploy/zImage ${MOUNT_PATH}/boot/vmlinuz-${kernel_ver}
 ```
 
 **Copy Kernel Device Tree Binaries**
@@ -490,7 +478,7 @@ sudo cp -r ./deploy/modules/. ${MOUNT_PATH}/usr/
 **File Systems Table (/etc/fstab)**
 ```bash
 #user@localhost:~/$
-sudo sh -c "echo '/dev/mmcblk0p4  /  auto  errors=remount-ro  0  1' >> /mnt/rootfs/etc/fstab"
+sudo sh -c "echo '/dev/mmcblk0p4  /  auto  errors=remount-ro  0  1' >> ${MOUNT_PATH}/etc/fstab"
 ```
 
 **For DK2 board. WiFi bin and config files**
