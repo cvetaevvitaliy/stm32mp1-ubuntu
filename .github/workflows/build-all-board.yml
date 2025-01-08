@@ -57,7 +57,7 @@ jobs:
           echo "password: root" >> ./upload/login-pass.txt
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: ubuntu-22.04-${{ matrix.board }} (this is unzipped size)
           path: ./upload
